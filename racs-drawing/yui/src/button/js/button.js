@@ -36,10 +36,10 @@
 var COMPONENTNAME = 'atto_racs-drawing',
     LOGNAME = 'atto_racs-drawing',
     CSS = {
-		DRAWLINE: '',
-		ERASER: '',
-		CANVAS: '',
-		DONE: ''
+		DRAWLINE: 'atto_racs-drawing_drawline',
+		ERASER: 'atto_racs-drawing_eraser',
+		CANVAS: 'atto_racs-drawing_canvas',
+		DONE: 'atto_racs-drawing_done'
 	},
     REGEX = {
             ISPERCENT: /\d+%/
