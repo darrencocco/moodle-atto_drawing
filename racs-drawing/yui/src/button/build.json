@@ -1,0 +1,10 @@
+{
+  "name": "moodle-atto_racs-drawing-button",
+  "builds": {
+    "moodle-atto_racs-drawing-button": {
+      "jsfiles": [
+        "button.js"
+      ]
+    }
+  }
+}
