@@ -20,3 +20,6 @@
  * @package    atto_racs-drawing
  * @copyright  2015 Darren Cocco - Royal Australasian College of Surgeons  <darren.cocco@surgeons.org>
  */
+$string['draw_line'] = "Draw a line";
+$string['eraser'] = "Erase";
+$string['save_complete'] = "Save";
