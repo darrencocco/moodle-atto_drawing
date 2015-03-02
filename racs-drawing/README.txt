@@ -1,0 +1,1 @@
+Copy this folder into moodle_root/lib/editor/atto/plugins/ to install.
