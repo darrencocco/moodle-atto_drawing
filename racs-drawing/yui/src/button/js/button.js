@@ -39,7 +39,10 @@ var COMPONENTNAME = 'atto_racs-drawing',
 		DRAWLINE: 'atto_racs-drawing_drawline',
 		ERASER: 'atto_racs-drawing_eraser',
 		CANVAS: 'atto_racs-drawing_canvas',
-		DONE: 'atto_racs-drawing_done'
+		DONE: 'atto_racs-drawing_done',
+		INPUTALT: 'atto_racs-drawing_inputalt',
+		INPUTSIZE: 'atto_racs-drawing_inputsize',
+		INPUTHEIGHT: 'atto_racs-drawing_inputheight'
 	},
     REGEX = {
             ISPERCENT: /\d+%/
@@ -48,8 +51,12 @@ var COMPONENTNAME = 'atto_racs-drawing',
     			'<form class="atto_form">' +
     				'<button class="{{CSS.DRAWLINE}}" type="button">{{get_string "draw_line" component}}</button>' +
     				'<button class="{{CSS.ERASER}}" type="button">{{get_string "eraser" component}}</button>' +
-    				'<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>';
-					'<button class="{{CSS.DONE}} type="button">{{get_string "save_complete" component}}</button>'
+    				'<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
+					'<button class="{{CSS.DONE}} type="button">{{get_string "save_complete" component}}</button>' +
+					'<input type="hidden" class={{CSS.INPUTALT}} value="" id="{{elementid}}_{{CSS.INPUTALT}} />' +
+					'<input type="hidden" class={{CSS.INPUTSIZE}} value="" id="{{elementid}}_{{CSS.INPUTSIZE}} />' +
+					'<input type="hidden" class={{CSS.INPUTHEIGHT}} value="" id="{{elementid}}_{{CSS.INPUTHEIGHT}} />' +
+					'<input type="hidden" class={{CSS.INPUTALT}} value="" id="{{elementid}}_{{CSS.INPUTALT}} />' +
 				'</form>',
 	IMAGETEMPLATE = '' +
 	            '<img src="{{url}}" alt="{{alt}}" ' +
@@ -185,37 +192,31 @@ Y.namespace('M.atto_racs-drawing').Button = Y.Base.create('button', Y.M.editor_a
                     form.one('.' + CSS.INPUTALIGNMENT).set('value', css);
                 }
             }
-            // Remove the custom style option if this is a new image.
-            form.one('.' + CSS.INPUTALIGNMENT).getDOMNode().options.remove(ALIGNMENTS.length - 1);
             return;
         }
 
-        /*if (properties.align) {
+        if (properties.align) {
             form.one('.' + CSS.INPUTALIGNMENT).set('value', properties.align);
-            // Remove the custom style option if we have a standard alignment.
-            form.one('.' + CSS.INPUTALIGNMENT).getDOMNode().options.remove(ALIGNMENTS.length - 1);
-        } else {
-            form.one('.' + CSS.INPUTALIGNMENT).set('value', 'style:customstyle;');
-        }
-        if (properties.customstyle) {
-            form.one('.' + CSS.INPUTCUSTOMSTYLE).set('value', properties.customstyle);
         }
         if (properties.width) {
             form.one('.' + CSS.INPUTWIDTH).set('value', properties.width);
         }
         if (properties.height) {
             form.one('.' + CSS.INPUTHEIGHT).set('value', properties.height);
-        }*/
+        }
         if (properties.alt) {
             form.one('.' + CSS.INPUTALT).set('value', properties.alt);
         }
-        /*if (properties.src) {
-            form.one('.' + CSS.INPUTURL).set('value', properties.src);
+        if (properties.src) {
+            //This should theoritically load the already existing image into the drawing panel.
+        	var theImage = new Image()
+        	theImage.src = properties.src;
+        	form.one('.' + CSS.INPUTURL).getContext('2d').drawImage(theImage, 0, 0);
             this._loadPreviewImage(properties.src);
         }
         if (properties.presentation) {
             form.one('.' + CSS.IMAGEPRESENTATION).set('checked', 'checked');
-        }*/
+        }
 
         // Update the image preview based on the form properties.
         this._autoAdjustSize();
@@ -231,77 +232,57 @@ Y.namespace('M.atto_racs-drawing').Button = Y.Base.create('button', Y.M.editor_a
     _setImage: function(e) {
         var form = this._form,
             url = form.one('.' + CSS.CANVAS).toDataURL(),
-/*            alt = form.one('.' + CSS.INPUTALT).get('value'),
+            alt = form.one('.' + CSS.INPUTALT).get('value'),
             width = form.one('.' + CSS.INPUTWIDTH).get('value'),
             height = form.one('.' + CSS.INPUTHEIGHT).get('value'),
             alignment = form.one('.' + CSS.INPUTALIGNMENT).get('value'),
             margin = '',
-            presentation = form.one('.' + CSS.IMAGEPRESENTATION).get('checked'),
-            constrain = form.one('.' + CSS.INPUTCONSTRAIN).get('checked'),
             imagehtml,
             customstyle = '',
             i,
-            classlist = [],*/
+            classlist = [],
             host = this.get('host');
 
         e.preventDefault();
 
-        // Check if there are any accessibility issues.
-        /*if (this._updateWarning()) {
-            return;
-        }*/
-
         // Focus on the editor in preparation for inserting the image.
         host.focus();
-        if (url !== '') {
-            if (this._selectedImage) {
-                host.setSelection(host.getSelectionFromNode(this._selectedImage));
-            } else {
-                host.setSelection(this._currentSelection);
-            }
-
-            /*if (alignment === 'style:customstyle;') {
-                alignment = '';
-                customstyle = form.one('.' + CSS.INPUTCUSTOMSTYLE).get('value');
-            } else {
-                for (i in ALIGNMENTS) {
-                    css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
-                    if (alignment === css) {
-                        margin = ' margin: ' + ALIGNMENTS[i].margin + ';';
-                    }
-                }
-            }
-
-            if (constrain) {
-                classlist.push(CSS.RESPONSIVE);
-            }
-
-            if (!width.match(REGEX.ISPERCENT) && isNaN(parseInt(width, 10))) {
-                form.one('.' + CSS.INPUTWIDTH).focus();
-                return;
-            }
-            if (!height.match(REGEX.ISPERCENT) && isNaN(parseInt(height, 10))) {
-                form.one('.' + CSS.INPUTHEIGHT).focus();
-                return;
-            }
-
-            template = Y.Handlebars.compile(IMAGETEMPLATE);
-            imagehtml = template({
-                url: url,
-                alt: alt,
-                width: width,
-                height: height,
-                presentation: presentation,
-                alignment: alignment,
-                margin: margin,
-                customstyle: customstyle,
-                classlist: classlist.join(' ')
-            });*/
-
-            this.get('host').insertContentAtFocusPoint(imagehtml);
-
-            this.markUpdated();
+        if (this._selectedImage) {
+            host.setSelection(host.getSelectionFromNode(this._selectedImage));
+        } else {
+            host.setSelection(this._currentSelection);
         }
+
+        for (i in ALIGNMENTS) {
+            css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
+            if (alignment === css) {
+                margin = ' margin: ' + ALIGNMENTS[i].margin + ';';
+            }
+        }
+
+        if (!width.match(REGEX.ISPERCENT) && isNaN(parseInt(width, 10))) {
+            form.one('.' + CSS.INPUTWIDTH).focus();
+            return;
+        }
+        if (!height.match(REGEX.ISPERCENT) && isNaN(parseInt(height, 10))) {
+            form.one('.' + CSS.INPUTHEIGHT).focus();
+            return;
+        }
+
+        template = Y.Handlebars.compile(IMAGETEMPLATE);
+        imagehtml = template({
+            url: url,
+            alt: alt,
+            width: width,
+            height: height,
+            alignment: alignment,
+            margin: margin,
+            classlist: classlist.join(' ')
+        });
+
+        this.get('host').insertContentAtFocusPoint(imagehtml);
+
+        this.markUpdated();
 
         this.getDialogue({
             focusAfterHide: null
