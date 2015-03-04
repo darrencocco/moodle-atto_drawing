@@ -15,13 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'atto_racsdrawing', language 'en'.
+ * Atto text editor integration version file.
  *
  * @package    atto_racsdrawing
  * @copyright  2015 Darren Cocco - Royal Australasian College of Surgeons  <darren.cocco@surgeons.org>
  */
-$string['draw_line'] = "Draw a line";
-$string['eraser'] = "Erase";
-$string['save_complete'] = "Save";
-$string['pluginname'] = 'Drawing';
-$string['dialogtitle'] = "RACS Sketching Tool";
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Initialise the strings required for js
+ */
+function atto_racsdrawing_strings_for_js() {
+    global $PAGE;
+
+    $strings = array(
+        'draw_line',
+        'eraser',
+        'save_complete',
+        'pluginname',
+        'dialogtitle',
+    );
+
+    $PAGE->requires->strings_for_js($strings, 'atto_racsdrawing');
+}
+

@@ -38,40 +38,77 @@ YUI.add('moodle-atto_racsdrawing-button', function (Y, NAME) {
 var COMPONENTNAME = 'atto_racsdrawing',
     LOGNAME = 'atto_racsdrawing',
     CSS = {
-		DRAWLINE: 'atto_racsdrawing_drawline',
-		ERASER: 'atto_racsdrawing_eraser',
-		CANVAS: 'atto_racsdrawing_canvas',
-		DONE: 'atto_racsdrawing_done',
-		INPUTALT: 'atto_racsdrawing_inputalt',
-		INPUTSIZE: 'atto_racsdrawing_inputsize',
-		INPUTHEIGHT: 'atto_racsdrawing_inputheight'
-	},
+        DRAWLINE: 'atto_racsdrawing_drawline',
+        ERASER: 'atto_racsdrawing_eraser',
+        CANVAS: 'atto_racsdrawing_canvas',
+        DONE: 'atto_racsdrawing_done',
+        INPUTALT: 'atto_racsdrawing_inputalt',
+        INPUTSIZE: 'atto_racsdrawing_inputsize',
+        INPUTHEIGHT: 'atto_racsdrawing_inputheight'
+    },
     REGEX = {
             ISPERCENT: /\d+%/
         },
-    TEMPLATES = '' +
-    			'<form class="atto_form">' +
-    				'<button class="{{CSS.DRAWLINE}}" type="button">{{get_string "draw_line" component}}</button>' +
-    				'<button class="{{CSS.ERASER}}" type="button">{{get_string "eraser" component}}</button>' +
-    				'<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
-					'<button class="{{CSS.DONE}} type="button">{{get_string "save_complete" component}}</button>' +
-					'<input type="hidden" class={{CSS.INPUTALT}} value="" id="{{elementid}}_{{CSS.INPUTALT}} />' +
-					'<input type="hidden" class={{CSS.INPUTSIZE}} value="" id="{{elementid}}_{{CSS.INPUTSIZE}} />' +
-					'<input type="hidden" class={{CSS.INPUTHEIGHT}} value="" id="{{elementid}}_{{CSS.INPUTHEIGHT}} />' +
-					'<input type="hidden" class={{CSS.INPUTALT}} value="" id="{{elementid}}_{{CSS.INPUTALT}} />' +
-				'</form>',
-	IMAGETEMPLATE = '' +
-	            '<img src="{{url}}" alt="{{alt}}" ' +
-	                '{{#if width}}width="{{width}}" {{/if}}' +
-	                '{{#if height}}height="{{height}}" {{/if}}' +
-	                '{{#if presentation}}role="presentation" {{/if}}' +
-	                'style="{{alignment}}{{margin}}{{customstyle}}"' +
-	                '{{#if classlist}}class="{{classlist}}" {{/if}}' +
+    ALIGNMENTS = [
+                  // Vertical alignment.
+                  {
+                      name: 'text-top',
+                      str: 'alignment_top',
+                      value: 'vertical-align',
+                      margin: '0 .5em'
+                  }, {
+                      name: 'middle',
+                      str: 'alignment_middle',
+                      value: 'vertical-align',
+                      margin: '0 .5em'
+                  }, {
+                      name: 'text-bottom',
+                      str: 'alignment_bottom',
+                      value: 'vertical-align',
+                      margin: '0 .5em',
+                      isDefault: true
+                  },
+
+                  // Floats.
+                  {
+                      name: 'left',
+                      str: 'alignment_left',
+                      value: 'float',
+                      margin: '0 .5em 0 0'
+                  }, {
+                      name: 'right',
+                      str: 'alignment_right',
+                      value: 'float',
+                      margin: '0 0 0 .5em'
+                  }, {
+                      name: 'customstyle',
+                      str: 'customstyle',
+                      value: 'style'
+                  }
+              ],
+    TEMPLATE = '' +
+                '<form class="atto_form">' +
+                '<button class="{{CSS.DRAWLINE}}" type="button">{{get_string "draw_line" component}}</button>' +
+                    '<button class="{{CSS.ERASER}}" type="button">{{get_string "eraser" component}}</button>' +
+                    '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
+                    '<button class="{{CSS.DONE}}" type="button">{{get_string "save_complete" component}}</button>' +
+                    '<input type="hidden" class={{CSS.INPUTALT}} value="" id="{{elementid}}_{{CSS.INPUTALT}} />' +
+                    '<input type="hidden" class={{CSS.INPUTSIZE}} value="" id="{{elementid}}_{{CSS.INPUTSIZE}} />' +
+                    '<input type="hidden" class={{CSS.INPUTHEIGHT}} value="" id="{{elementid}}_{{CSS.INPUTHEIGHT}} />' +
+                    '<input type="hidden" class={{CSS.INPUTALT}} value="" id="{{elementid}}_{{CSS.INPUTALT}} />' +
+                '</form>',
+    IMAGETEMPLATE = '' +
+                '<img src="{{url}}" alt="{{alt}}" ' +
+                    '{{#if width}}width="{{width}}" {{/if}}' +
+                    '{{#if height}}height="{{height}}" {{/if}}' +
+                    '{{#if presentation}}role="presentation" {{/if}}' +
+                    'style="{{alignment}}{{margin}}{{customstyle}}"' +
+                    '{{#if classlist}}class="{{classlist}}" {{/if}}' +
                 '/>';
 
 
 Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_atto.EditorPlugin, [], {
-	/**
+    /**
      * A reference to the current selection at the time that the dialogue
      * was opened.
      *
@@ -134,10 +171,9 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         this._rawImageDimensions = null;
 
         var dialogue = this.getDialogue({
-            headerContent: M.util.get_string('imageproperties', COMPONENTNAME),
+            headerContent: M.util.get_string('dialogtitle', COMPONENTNAME),
             width: '900px',
-            focusAfterHide: true,
-            focusOnShowSelector: SELECTORS.INPUTURL
+            focusAfterHide: true
         });
 
         // Set the dialogue content, and then show the dialogue.
@@ -182,18 +218,11 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      */
     _applyImageProperties: function(form) {
         var properties = this._getSelectedImageProperties(),
-            img = form.one('.' + CSS.IMAGEPREVIEW),
-            i;
+            i,
+            theImage,
+            css;
 
         if (properties === false) {
-            img.setStyle('display', 'none');
-            // Set the default alignment.
-            for (i in ALIGNMENTS) {
-                if (ALIGNMENTS[i].isDefault === true) {
-                    css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
-                    form.one('.' + CSS.INPUTALIGNMENT).set('value', css);
-                }
-            }
             return;
         }
 
@@ -211,17 +240,13 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         }
         if (properties.src) {
             //This should theoritically load the already existing image into the drawing panel.
-        	var theImage = new Image()
-        	theImage.src = properties.src;
-        	form.one('.' + CSS.INPUTURL).getContext('2d').drawImage(theImage, 0, 0);
-            this._loadPreviewImage(properties.src);
-        }
-        if (properties.presentation) {
-            form.one('.' + CSS.IMAGEPRESENTATION).set('checked', 'checked');
+            theImage = new Image();
+            theImage.src = properties.src;
+            form.one('.' + CSS.CANVAS)._node.getContext('2d').drawImage(theImage, 0, 0);
         }
 
         // Update the image preview based on the form properties.
-        this._autoAdjustSize();
+        //this._autoAdjustSize();
     },
 
     /**
@@ -233,7 +258,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      */
     _setImage: function(e) {
         var form = this._form,
-            url = form.one('.' + CSS.CANVAS).toDataURL(),
+            url = form.one('.' + CSS.CANVAS)._node.toDataURL(),
             alt = form.one('.' + CSS.INPUTALT).get('value'),
             width = form.one('.' + CSS.INPUTWIDTH).get('value'),
             height = form.one('.' + CSS.INPUTHEIGHT).get('value'),
@@ -242,6 +267,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             imagehtml,
             customstyle = '',
             i,
+            template,
             classlist = [],
             host = this.get('host');
 
@@ -313,7 +339,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
 
             // Get the current selection.
             images = this.get('host').getSelectedNodes(),
-            i, width, height, style, css;
+            i, width, height, style, css, image, margin;
 
         if (images) {
             images = images.filter('img');
@@ -363,7 +389,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         // No image selected - clean up.
         this._selectedImage = null;
         return false;
-    },
+    }
 });
 
 }, '@VERSION@', {"requires": ["moodle-editor_atto-plugin"]});
