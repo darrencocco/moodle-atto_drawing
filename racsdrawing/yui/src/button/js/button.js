@@ -1,5 +1,3 @@
-YUI.add('moodle-atto_racs-drawing-button', function (Y, NAME) {
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,7 +14,7 @@ YUI.add('moodle-atto_racs-drawing-button', function (Y, NAME) {
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    atto_racs-drawing
+ * @package    atto_racsdrawing
  * @copyright  2015 Darren Cocco - Royal Australasian College of Surgeons  <darren.cocco@surgeons.org>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
@@ -30,21 +28,21 @@ YUI.add('moodle-atto_racs-drawing-button', function (Y, NAME) {
 /**
  * Atto drawing plugin.
  *
- * @namespace M.atto_racs-drawing
+ * @namespace M.atto_racsdrawing
  * @class Button
  * @extends M.editor_atto.EditorPlugin
  */
 
-var COMPONENTNAME = 'atto_racs-drawing',
-    LOGNAME = 'atto_racs-drawing',
+var COMPONENTNAME = 'atto_racsdrawing',
+    LOGNAME = 'atto_racsdrawing',
     CSS = {
-		DRAWLINE: 'atto_racs-drawing_drawline',
-		ERASER: 'atto_racs-drawing_eraser',
-		CANVAS: 'atto_racs-drawing_canvas',
-		DONE: 'atto_racs-drawing_done',
-		INPUTALT: 'atto_racs-drawing_inputalt',
-		INPUTSIZE: 'atto_racs-drawing_inputsize',
-		INPUTHEIGHT: 'atto_racs-drawing_inputheight'
+		DRAWLINE: 'atto_racsdrawing_drawline',
+		ERASER: 'atto_racsdrawing_eraser',
+		CANVAS: 'atto_racsdrawing_canvas',
+		DONE: 'atto_racsdrawing_done',
+		INPUTALT: 'atto_racsdrawing_inputalt',
+		INPUTSIZE: 'atto_racsdrawing_inputsize',
+		INPUTHEIGHT: 'atto_racsdrawing_inputheight'
 	},
     REGEX = {
             ISPERCENT: /\d+%/
@@ -70,7 +68,7 @@ var COMPONENTNAME = 'atto_racs-drawing',
                 '/>';
 
 
-Y.namespace('M.atto_racs-drawing').Button = Y.Base.create('button', Y.M.editor_atto.EditorPlugin, [], {
+Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_atto.EditorPlugin, [], {
 	/**
      * A reference to the current selection at the time that the dialogue
      * was opened.
@@ -365,5 +363,3 @@ Y.namespace('M.atto_racs-drawing').Button = Y.Base.create('button', Y.M.editor_a
         return false;
     },
 });
-
-}, '@VERSION@', {"requires": ["moodle-editor_atto-plugin"]});

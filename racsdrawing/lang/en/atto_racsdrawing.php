@@ -15,14 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Atto text editor integration version file.
+ * Strings for component 'atto_racsdrawing', language 'en'.
  *
- * @package    atto_racs-drawing
+ * @package    atto_racsdrawing
  * @copyright  2015 Darren Cocco - Royal Australasian College of Surgeons  <darren.cocco@surgeons.org>
  */
-
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version   = 2015030200;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2014050800;        // Requires this Moodle version.
-$plugin->component = 'atto_racs-drawing';  // Full name of the plugin (used for diagnostics).
+$string['draw_line'] = "Draw a line";
+$string['eraser'] = "Erase";
+$string['save_complete'] = "Save";

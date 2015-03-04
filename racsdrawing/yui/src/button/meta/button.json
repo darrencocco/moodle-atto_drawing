@@ -1,5 +1,5 @@
 {
-    "moodle-atto_racs-drawing-button": {
+    "moodle-atto_racsdrawing-button": {
         "requires": [
             "moodle-editor_atto-plugin"
         ]
