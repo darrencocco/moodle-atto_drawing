@@ -34,7 +34,6 @@
  */
 
 var COMPONENTNAME = 'atto_racsdrawing',
-    LOGNAME = 'atto_racsdrawing',
     CSS = {
         DRAWLINE: 'atto_racsdrawing_drawline',
         ERASER: 'atto_racsdrawing_eraser',
@@ -216,9 +215,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      */
     _applyImageProperties: function(form) {
         var properties = this._getSelectedImageProperties(),
-            i,
-            theImage,
-            css;
+            theImage;
 
         if (properties === false) {
             return;
@@ -263,8 +260,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             alignment = form.one('.' + CSS.INPUTALIGNMENT).get('value'),
             margin = '',
             imagehtml,
-            customstyle = '',
             i,
+            css,
             template,
             classlist = [],
             host = this.get('host');
