@@ -92,10 +92,10 @@ var COMPONENTNAME = 'atto_racsdrawing',
                     '<button class="{{CSS.ERASER}}" type="button">{{get_string "eraser" component}}</button>' +
                     '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
                     '<button class="{{CSS.DONE}}" type="button">{{get_string "save_complete" component}}</button>' +
-                    '<input type="hidden" class={{CSS.INPUTALT}} value="" id="{{elementid}}_{{CSS.INPUTALT}} />' +
-                    '<input type="hidden" class={{CSS.INPUTSIZE}} value="" id="{{elementid}}_{{CSS.INPUTSIZE}} />' +
-                    '<input type="hidden" class={{CSS.INPUTHEIGHT}} value="" id="{{elementid}}_{{CSS.INPUTHEIGHT}} />' +
-                    '<input type="hidden" class={{CSS.INPUTALT}} value="" id="{{elementid}}_{{CSS.INPUTALT}} />' +
+                    '<input type="hidden" class="{{CSS.INPUTALT}}" value="" id="{{elementid}}_{{CSS.INPUTALT}}" />' +
+                    '<input type="hidden" class="{{CSS.INPUTSIZE}}" value="" id="{{elementid}}_{{CSS.INPUTSIZE}}" />' +
+                    '<input type="hidden" class="{{CSS.INPUTHEIGHT}}" value="" id="{{elementid}}_{{CSS.INPUTHEIGHT}}" />' +
+                    '<input type="hidden" class="{{CSS.INPUTALT}}" value="" id="{{elementid}}_{{CSS.INPUTALT}}" />' +
                 '</form>',
     IMAGETEMPLATE = '' +
                 '<img src="{{url}}" alt="{{alt}}" ' +
