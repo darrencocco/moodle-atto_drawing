@@ -42,8 +42,9 @@ var COMPONENTNAME = 'atto_racsdrawing',
         CANVAS: 'atto_racsdrawing_canvas',
         DONE: 'atto_racsdrawing_done',
         INPUTALT: 'atto_racsdrawing_inputalt',
-        INPUTSIZE: 'atto_racsdrawing_inputsize',
-        INPUTHEIGHT: 'atto_racsdrawing_inputheight'
+        INPUTWIDTH: 'atto_racsdrawing_inputwidth',
+        INPUTHEIGHT: 'atto_racsdrawing_inputheight',
+        INPUTALIGNMENT: 'atto_racsdrawing_inputalignment'
     },
     REGEX = {
             ISPERCENT: /\d+%/
@@ -87,14 +88,14 @@ var COMPONENTNAME = 'atto_racsdrawing',
               ],
     TEMPLATE = '' +
                 '<form class="atto_form">' +
-                '<button class="{{CSS.DRAWLINE}}" type="button">{{get_string "draw_line" component}}</button>' +
-                    '<button class="{{CSS.ERASER}}" type="button">{{get_string "eraser" component}}</button>' +
+                    '<input class="{{CSS.DRAWLINE}} yui3-button" type="image" src="{{image_url "pencil" component}}" alt="{{get_string "draw_line" component}}" title="{{get_string "draw_line" component}}"></input>' +
+                    '<input class="{{CSS.ERASER}} yui3-button" type="image" src="{{image_url "eraser" component}}" alt="{{get_string "eraser" component}}" title="{{get_string "eraser" component}}"></input>' +
                     '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
                     '<button class="{{CSS.DONE}}" type="button">{{get_string "save_complete" component}}</button>' +
                     '<input type="hidden" class="{{CSS.INPUTALT}}" value="" id="{{elementid}}_{{CSS.INPUTALT}}" />' +
-                    '<input type="hidden" class="{{CSS.INPUTSIZE}}" value="" id="{{elementid}}_{{CSS.INPUTSIZE}}" />' +
+                    '<input type="hidden" class="{{CSS.INPUTWIDTH}}" value="" id="{{elementid}}_{{CSS.INPUTWIDTH}}" />' +
                     '<input type="hidden" class="{{CSS.INPUTHEIGHT}}" value="" id="{{elementid}}_{{CSS.INPUTHEIGHT}}" />' +
-                    '<input type="hidden" class="{{CSS.INPUTALT}}" value="" id="{{elementid}}_{{CSS.INPUTALT}}" />' +
+                    '<input type="hidden" class="{{CSS.INPUTALIGNMENT}}" value="" id="{{elementid}}_{{CSS.INPUTALIGNMENT}}" />' +
                 '</form>',
     IMAGETEMPLATE = '' +
                 '<img src="{{url}}" alt="{{alt}}" ' +
@@ -136,17 +137,40 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
     _form: null,
 
     /**
-     * The dimensions of the raw image before we manipulate it.
+     * The current colour the drawing tool is set too
      *
-     * @param _rawImageDimensions
+     * @param _colour
+     * @type String
+     * @private
+     */
+    _colour: null,
+
+    /**
+     * The size of the stroke to draw with
+     *
+     * @param _size
+     * @type Unknown
+     * @private
+     */
+    _size: null,
+
+    /**
+     * The last recorded relative position of the mouse
+     * cursor inside the canvas element.
+     *
+     * @param _mouse
      * @type Object
      * @private
      */
-    _rawImageDimensions: null,
+    _mouse: {
+        x: null,
+        y: null
+    },
 
     initializer: function() {
         this.addButton({
-            icon: 'e/insert_edit_image', //TODO work out how to change this and add a custom icon
+            icon: 'icon',
+            iconComponent: COMPONENTNAME,
             callback: this._displayDialogue,
             tags: 'drawing',
             tagMatchRequiresAll: false
@@ -194,7 +218,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
                 elementid: this.get('host').get('elementid'),
                 CSS: CSS,
                 component: COMPONENTNAME
-            }));
+            })),
+            self = this;
 
         this._form = content;
 
@@ -204,6 +229,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         this._form.one('.' + CSS.DRAWLINE).on('click', this._drawLineEnabled, this, '#000000');
         this._form.one('.' + CSS.ERASER).on('click', this._drawLineEnabled, this, '#FFFFFF');
         this._form.one('.' + CSS.DONE).on('click', this._setImage, this);
+        this._form.one('.' + CSS.CANVAS).on('mousedown', this._draw, self);
+        this._form.one('.' + CSS.CANVAS).on('mousemove', this._updateMousePosition, self);
 
         return content;
     },
@@ -239,6 +266,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             //This should theoritically load the already existing image into the drawing panel.
             theImage = new Image();
             theImage.src = properties.src;
+            form.one('.' + CSS.CANVAS).setAttribute('height', theImage.height);
+            form.one('.' + CSS.CANVAS).setAttribute('width', theImage.width);
             form.one('.' + CSS.CANVAS)._node.getContext('2d').drawImage(theImage, 0, 0);
         }
 
@@ -283,15 +312,6 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             if (alignment === css) {
                 margin = ' margin: ' + ALIGNMENTS[i].margin + ';';
             }
-        }
-
-        if (!width.match(REGEX.ISPERCENT) && isNaN(parseInt(width, 10))) {
-            form.one('.' + CSS.INPUTWIDTH).focus();
-            return;
-        }
-        if (!height.match(REGEX.ISPERCENT) && isNaN(parseInt(height, 10))) {
-            form.one('.' + CSS.INPUTHEIGHT).focus();
-            return;
         }
 
         template = Y.Handlebars.compile(IMAGETEMPLATE);
@@ -379,13 +399,50 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             }
             properties.src = image.getAttribute('src');
             properties.alt = image.getAttribute('alt') || '';
-            properties.presentation = (image.get('role') === 'presentation');
             return properties;
         }
 
         // No image selected - clean up.
         this._selectedImage = null;
         return false;
+    },
+
+    _draw: function() {
+        var canvasNode = this._form.one('.' + CSS.CANVAS),
+            intervalDraw,
+            underlyingNode = canvasNode._node,
+            self = this;
+        this._lastMouse = {
+                    x: this._mouse.x,
+                    y: this._mouse.y
+                };
+        intervalDraw = setInterval(function(){self._drawLine(underlyingNode.getContext('2d'));}, 10);
+
+        canvasNode.on('mouseup', function(){clearInterval(this);}, intervalDraw);
+        canvasNode.on('mouseleave', function(){clearInterval(this);}, intervalDraw);
+    },
+    _updateMousePosition: function (evt) {
+        var canvas = this._form.one('.' + CSS.CANVAS)._node,
+            position = this._getMousePosition(evt, canvas);
+        this._mouse.x = position.x;
+        this._mouse.y = position.y;
+    },
+    _getMousePosition: function (evt, canvas) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
+    },
+    _drawLine: function(context) {
+        context.beginPath();
+        context.moveTo(this._lastMouse.x, this._lastMouse.y);
+        context.lineTo(this._mouse.x, this._mouse.y);
+        context.stroke();
+        this._lastMouse = {
+                x: this._mouse.x,
+                y: this._mouse.y
+            };
     }
 });
 
