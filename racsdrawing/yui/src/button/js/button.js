@@ -93,19 +93,19 @@ var COMPONENTNAME = 'atto_racsdrawing',
                   }
               ],
     COLOUR = {
-			WHITE: '#FFFFFF',
-			BLACK: '#000000'
+            WHITE: '#FFFFFF',
+            BLACK: '#000000'
         },
     WIDTH = {
-		    SMALL: 3,
-		    MEDIUM: 8,
-		    LARGE: 12
+            SMALL: 3,
+            MEDIUM: 8,
+            LARGE: 12
         },
     TEMPLATE = '' +
                 '<form class="{{CSS.FORM}} atto_form">' +
                     '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
                     '<div class="{{CSS.TOOLS}}">' +
-                    	'<div class="{{CSS.TOOLSGROUP}}">' +
+                        '<div class="{{CSS.TOOLSGROUP}}">' +
                             '<button class="{{CSS.DRAWLINE}} radio" type="button" title="{{get_string "draw_line" component}}">'+
                                 '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "pencil" component}}"/>'+
                             '</button>' +
@@ -114,14 +114,14 @@ var COMPONENTNAME = 'atto_racsdrawing',
                             '</button>' +
                         '</div>' +
                         '<div class="{{CSS.BRUSHSIZEGROUP}}">' +
-                        	'<button class="{{CSS.SMALLBRUSH}} radio" type="button" title="{{get_string "small_brush" component}}">' +
-                    			'<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "small_brush" component}}"/>' +
-                    		'</button>' +
+                            '<button class="{{CSS.SMALLBRUSH}} radio" type="button" title="{{get_string "small_brush" component}}">' +
+                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "small_brush" component}}"/>' +
+                            '</button>' +
                             '<button class="{{CSS.MEDIUMBRUSH}} radio" type="button" title="{{get_string "medium_brush" component}}">' +
-                            	'<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "medium_brush" component}}"/>' +
+                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "medium_brush" component}}"/>' +
                             '</button>' +
                             '<button class="{{CSS.LARGEBRUSH}} radio" type="button" title="{{get_string "large_brush" component}}">' +
-                            	'<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "large_brush" component}}"/>' +
+                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "large_brush" component}}"/>' +
                             '</button>' +
                         '</div>' +
                     '</div>' +
@@ -289,12 +289,12 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         this._form.one('.' + CSS.CANVAS).on('mousemove', this._updateMousePosition, this);
 
         this.colourButtonGroup = new Y.ButtonGroup({
-        	srcNode: this._form.one('.' + CSS.TOOLSGROUP),
-        	type: 'radio'
+            srcNode: this._form.one('.' + CSS.TOOLSGROUP),
+            type: 'radio'
         });
         this.widthButtonGroup = new Y.ButtonGroup({
-        	srcNode: this._form.one('.' + CSS.BRUSHSIZEGROUP),
-        	type: 'radio'
+            srcNode: this._form.one('.' + CSS.BRUSHSIZEGROUP),
+            type: 'radio'
         });
         return content;
     },
@@ -489,7 +489,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             underlyingNode = canvasNode._node,
             self = this;
         if(this._strokeWidth === null || this._strokeColour === null) {
-        	return;
+            return;
         }
         this._lastMouse = {
                     x: this._mouse.x,
