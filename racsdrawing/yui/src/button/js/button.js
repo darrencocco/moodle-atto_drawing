@@ -44,7 +44,13 @@ var COMPONENTNAME = 'atto_racsdrawing',
         INPUTHEIGHT: 'atto_racsdrawing_inputheight',
         INPUTALIGNMENT: 'atto_racsdrawing_inputalignment',
         TOOLS: 'atto_racsdrawing_toolspallet',
-        FORM: 'atto_racsdrawing_form'
+        FORM: 'atto_racsdrawing_form',
+        TOOLSGROUP: 'atto_racsdrawing_tools',
+        BRUSHSIZEGROUP: 'atto_racsdrawing_brushes',
+        SMALLBRUSH: 'atto_racsdrawing_smallbrush',
+        MEDIUMBRUSH: 'atto_racsdrawing_mediumbrush',
+        LARGEBRUSH: 'atto_racsdrawing_largebrush'
+
     },
     REGEX = {
             ISPERCENT: /\d+%/
@@ -86,16 +92,38 @@ var COMPONENTNAME = 'atto_racsdrawing',
                       value: 'style'
                   }
               ],
+    COLOUR = {
+			WHITE: '#FFFFFF',
+			BLACK: '#000000'
+        },
+    WIDTH = {
+		    SMALL: 3,
+		    MEDIUM: 8,
+		    LARGE: 12
+        },
     TEMPLATE = '' +
                 '<form class="{{CSS.FORM}} atto_form">' +
                     '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
                     '<div class="{{CSS.TOOLS}}">' +
-                        '<button class="{{CSS.DRAWLINE}}" type="button" title="{{get_string "draw_line" component}}">'+
-                            '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "pencil" component}}"/>'+
-                        '</button>' +
-                        '<button class="{{CSS.ERASER}}" type="button" title="{{get_string "eraser" component}}">' +
-                            '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "eraser" component}}"/>' +
-                        '</button>' +
+                    	'<div class="{{CSS.TOOLSGROUP}}">' +
+                            '<button class="{{CSS.DRAWLINE}} radio" type="button" title="{{get_string "draw_line" component}}">'+
+                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "pencil" component}}"/>'+
+                            '</button>' +
+                            '<button class="{{CSS.ERASER}} radio" type="button" title="{{get_string "eraser" component}}">' +
+                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "eraser" component}}"/>' +
+                            '</button>' +
+                        '</div>' +
+                        '<div class="{{CSS.BRUSHSIZEGROUP}}">' +
+                        	'<button class="{{CSS.SMALLBRUSH}} radio" type="button" title="{{get_string "small_brush" component}}">' +
+                    			'<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "small_brush" component}}"/>' +
+                    		'</button>' +
+                            '<button class="{{CSS.MEDIUMBRUSH}} radio" type="button" title="{{get_string "medium_brush" component}}">' +
+                            	'<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "medium_brush" component}}"/>' +
+                            '</button>' +
+                            '<button class="{{CSS.LARGEBRUSH}} radio" type="button" title="{{get_string "large_brush" component}}">' +
+                            	'<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "large_brush" component}}"/>' +
+                            '</button>' +
+                        '</div>' +
                     '</div>' +
                     '<button class="{{CSS.DONE}}" type="button">{{get_string "save_complete" component}}</button>' +
                     '<input type="hidden" class="{{CSS.INPUTALT}}" value="" id="{{elementid}}_{{CSS.INPUTALT}}" />' +
@@ -222,6 +250,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         // Set the dialogue content, and then show the dialogue.
         dialogue.set('bodyContent', this._getDialogueContent())
                 .show();
+        this.colourButtonGroup.render();
+        this.widthButtonGroup.render();
     },
 
     /**
@@ -237,7 +267,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             content = Y.Node.create(template({
                 elementid: this.get('host').get('elementid'),
                 CSS: CSS,
-                component: COMPONENTNAME
+                component: COMPONENTNAME,
+                COLOUR: COLOUR
             }));
 
         this._form = content;
@@ -245,12 +276,26 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         // Configure the view of the current image.
         this._applyImageProperties(this._form);
 
-        this._form.one('.' + CSS.DRAWLINE).on('click', this._eventSetLineColour, this, '#000000');
-        this._form.one('.' + CSS.ERASER).on('click', this._eventSetLineColour, this, '#FFFFFF');
+        this._strokeWidth = null;
+        this._strokeColour = null;
+
+        this._form.one('.' + CSS.DRAWLINE).on('click', this._eventSetLineColour, this, COLOUR.BLACK);
+        this._form.one('.' + CSS.ERASER).on('click', this._eventSetLineColour, this, COLOUR.WHITE);
+        this._form.one('.' + CSS.SMALLBRUSH).on('click', this._eventSetLineWidth, this, WIDTH.SMALL);
+        this._form.one('.' + CSS.MEDIUMBRUSH).on('click', this._eventSetLineWidth, this, WIDTH.MEDIUM);
+        this._form.one('.' + CSS.LARGEBRUSH).on('click', this._eventSetLineWidth, this, WIDTH.LARGE);
         this._form.one('.' + CSS.DONE).on('click', this._setImage, this);
         this._form.one('.' + CSS.CANVAS).on('mousedown', this._draw, this);
         this._form.one('.' + CSS.CANVAS).on('mousemove', this._updateMousePosition, this);
 
+        this.colourButtonGroup = new Y.ButtonGroup({
+        	srcNode: this._form.one('.' + CSS.TOOLSGROUP),
+        	type: 'radio'
+        });
+        this.widthButtonGroup = new Y.ButtonGroup({
+        	srcNode: this._form.one('.' + CSS.BRUSHSIZEGROUP),
+        	type: 'radio'
+        });
         return content;
     },
 
@@ -443,6 +488,9 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             intervalDraw,
             underlyingNode = canvasNode._node,
             self = this;
+        if(this._strokeWidth === null || this._strokeColour === null) {
+        	return;
+        }
         this._lastMouse = {
                     x: this._mouse.x,
                     y: this._mouse.y
@@ -533,5 +581,29 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      */
     _lineSetColour: function(colour) {
         this._strokeColour = colour;
+    },
+
+    /**
+     * Captures the the button click event for changing
+     * the width.
+     *
+     * @method _eventSetLineWidth
+     * @param {Event} evt
+     * @param {String} width
+     * @private
+     */
+    _eventSetLineWidth: function (evt, width) {
+        this._lineSetWidth(width);
+    },
+
+    /**
+     * Sets the width for the stroke.
+     *
+     * @method _lineSetWidth
+     * @param {String} Wwidth
+     * @private
+     */
+    _lineSetWidth: function(width) {
+        this._strokeWidth = width;
     }
 });

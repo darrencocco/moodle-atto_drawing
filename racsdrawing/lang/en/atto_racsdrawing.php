@@ -25,3 +25,6 @@ $string['eraser'] = "Erase";
 $string['save_complete'] = "Save";
 $string['pluginname'] = 'Drawing';
 $string['dialogtitle'] = "RACS Sketching Tool";
+$string['small_brush'] = "Small";
+$string['medium_brush'] = "Medium";
+$string['large_brush'] = "Large";

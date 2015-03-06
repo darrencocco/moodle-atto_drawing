@@ -35,6 +35,9 @@ function atto_racsdrawing_strings_for_js() {
         'save_complete',
         'pluginname',
         'dialogtitle',
+        'small_brush',
+        'medium_brush',
+        'large_brush'
     );
 
     $PAGE->requires->strings_for_js($strings, 'atto_racsdrawing');
