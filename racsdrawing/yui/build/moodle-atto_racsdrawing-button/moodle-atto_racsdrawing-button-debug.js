@@ -88,8 +88,12 @@ var COMPONENTNAME = 'atto_racsdrawing',
               ],
     TEMPLATE = '' +
                 '<form class="atto_form">' +
-                    '<input class="{{CSS.DRAWLINE}} yui3-button" type="image" src="{{image_url "pencil" component}}" alt="{{get_string "draw_line" component}}" title="{{get_string "draw_line" component}}"></input>' +
-                    '<input class="{{CSS.ERASER}} yui3-button" type="image" src="{{image_url "eraser" component}}" alt="{{get_string "eraser" component}}" title="{{get_string "eraser" component}}"></input>' +
+                    '<button class="{{CSS.DRAWLINE}}" type="button" title="{{get_string "draw_line" component}}">'+
+                        '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "pencil" component}}"/>'+
+                    '</button>' +
+                    '<button class="{{CSS.ERASER}}" type="button" title="{{get_string "eraser" component}}">' +
+                        '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "eraser" component}}"/>' +
+                    '</button>' +
                     '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
                     '<button class="{{CSS.DONE}}" type="button">{{get_string "save_complete" component}}</button>' +
                     '<input type="hidden" class="{{CSS.INPUTALT}}" value="" id="{{elementid}}_{{CSS.INPUTALT}}" />' +
@@ -137,24 +141,6 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
     _form: null,
 
     /**
-     * The current colour the drawing tool is set too
-     *
-     * @param _colour
-     * @type String
-     * @private
-     */
-    _colour: null,
-
-    /**
-     * The size of the stroke to draw with
-     *
-     * @param _size
-     * @type Unknown
-     * @private
-     */
-    _size: null,
-
-    /**
      * The last recorded relative position of the mouse
      * cursor inside the canvas element.
      *
@@ -166,6 +152,38 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         x: null,
         y: null
     },
+
+    /**
+     * Used to keep track of the the last position
+     * the mouse was encountered at that the mouse
+     * button was depressed at.
+     *
+     * @param _lastMouse
+     * @type Object
+     * @private
+     */
+    _lastMouse: {
+        x: null,
+        y: null
+    },
+
+    /**
+     * The size of the stroke to draw with
+     *
+     * @param _strokeWidth
+     * @type Number
+     * @private
+     */
+    _strokeWidth: null,
+
+    /**
+     * The current colour the drawing tool is set too
+     *
+     * @param _strokeColour
+     * @type String
+     * @private
+     */
+    _strokeColour: null,
 
     initializer: function() {
         this.addButton({
@@ -218,19 +236,18 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
                 elementid: this.get('host').get('elementid'),
                 CSS: CSS,
                 component: COMPONENTNAME
-            })),
-            self = this;
+            }));
 
         this._form = content;
 
         // Configure the view of the current image.
         this._applyImageProperties(this._form);
 
-        this._form.one('.' + CSS.DRAWLINE).on('click', this._drawLineEnabled, this, '#000000');
-        this._form.one('.' + CSS.ERASER).on('click', this._drawLineEnabled, this, '#FFFFFF');
+        this._form.one('.' + CSS.DRAWLINE).on('click', this._eventSetLineColour, this, '#000000');
+        this._form.one('.' + CSS.ERASER).on('click', this._eventSetLineColour, this, '#FFFFFF');
         this._form.one('.' + CSS.DONE).on('click', this._setImage, this);
-        this._form.one('.' + CSS.CANVAS).on('mousedown', this._draw, self);
-        this._form.one('.' + CSS.CANVAS).on('mousemove', this._updateMousePosition, self);
+        this._form.one('.' + CSS.CANVAS).on('mousedown', this._draw, this);
+        this._form.one('.' + CSS.CANVAS).on('mousemove', this._updateMousePosition, this);
 
         return content;
     },
@@ -407,6 +424,18 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         return false;
     },
 
+    /**
+     * Handles the the lifecycle of drawing a line.
+     *
+     * Sets _lastMouse starting point then sets up
+     * an interval to call _drawLine every 10 milliseconds.
+     * Two event triggers are set to clear the interval
+     * if the mouse leaves the canvas area or if the mouse
+     * button is released.
+     *
+     * @method _draw
+     * @private
+     */
     _draw: function() {
         var canvasNode = this._form.one('.' + CSS.CANVAS),
             intervalDraw,
@@ -421,12 +450,31 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         canvasNode.on('mouseup', function(){clearInterval(this);}, intervalDraw);
         canvasNode.on('mouseleave', function(){clearInterval(this);}, intervalDraw);
     },
+
+    /**
+     * Stores the relative mouse position in _mouse.
+     *
+     * @method _updateMousePosition
+     * @param {Event} evt
+     * @private
+     */
     _updateMousePosition: function (evt) {
         var canvas = this._form.one('.' + CSS.CANVAS)._node,
             position = this._getMousePosition(evt, canvas);
         this._mouse.x = position.x;
         this._mouse.y = position.y;
     },
+
+    /**
+     * Determines the relative position of the mouse
+     * to the canvas.
+     *
+     * @method _getMousePosition
+     * @param {Event} evt
+     * @param {Canvas} canvas
+     * @return {Object}
+     * @private
+     */
     _getMousePosition: function (evt, canvas) {
         var rect = canvas.getBoundingClientRect();
         return {
@@ -434,15 +482,55 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             y: evt.clientY - rect.top
         };
     },
+
+    /**
+     * Draws a line from _lastMouse to _mouse.
+     *
+     * Draws a line with rounded ends of the width
+     * specified by _strokeWidth with the colour
+     * _strokeColour.
+     * Finally updates _lastMouse to _mouse by copy.
+     *
+     * @method _drawLine
+     * @param {Canvas 2d context} context
+     * @private
+     */
     _drawLine: function(context) {
         context.beginPath();
         context.moveTo(this._lastMouse.x, this._lastMouse.y);
         context.lineTo(this._mouse.x, this._mouse.y);
+        context.lineCap = 'round';
+        context.lineWidth = this._strokeWidth;
+        context.strokeStyle = this._strokeColour;
         context.stroke();
         this._lastMouse = {
                 x: this._mouse.x,
                 y: this._mouse.y
             };
+    },
+
+    /**
+     * Captures the the button click event for changing
+     * the colour.
+     *
+     * @method _eventSetLineColour
+     * @param {Event} evt
+     * @param {String} colour
+     * @private
+     */
+    _eventSetLineColour: function (evt, colour) {
+    	this._lineSetColour(colour);
+    },
+
+    /**
+     * Sets the colour for the stroke.
+     *
+     * @method _lineSetColour
+     * @param {String} colour
+     * @private
+     */
+    _lineSetColour: function(colour) {
+        this._strokeColour = colour;
     }
 });
 
