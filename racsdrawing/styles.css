@@ -9,9 +9,20 @@
 }
 
 .atto_racsdrawing_canvas {
-
+    position: relative
 }
 
 .atto_racsdrawing_done {
 
+}
+
+.atto_racsdrawing_toolspallet {
+    position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 64px
+}
+
+.atto_racsdrawing_form {
+	position: relative;
 }

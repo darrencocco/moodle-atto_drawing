@@ -42,7 +42,9 @@ var COMPONENTNAME = 'atto_racsdrawing',
         INPUTALT: 'atto_racsdrawing_inputalt',
         INPUTWIDTH: 'atto_racsdrawing_inputwidth',
         INPUTHEIGHT: 'atto_racsdrawing_inputheight',
-        INPUTALIGNMENT: 'atto_racsdrawing_inputalignment'
+        INPUTALIGNMENT: 'atto_racsdrawing_inputalignment',
+        TOOLS: 'atto_racsdrawing_toolspallet',
+        FORM: 'atto_racsdrawing_form'
     },
     REGEX = {
             ISPERCENT: /\d+%/
@@ -85,14 +87,16 @@ var COMPONENTNAME = 'atto_racsdrawing',
                   }
               ],
     TEMPLATE = '' +
-                '<form class="atto_form">' +
-                    '<button class="{{CSS.DRAWLINE}}" type="button" title="{{get_string "draw_line" component}}">'+
-                        '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "pencil" component}}"/>'+
-                    '</button>' +
-                    '<button class="{{CSS.ERASER}}" type="button" title="{{get_string "eraser" component}}">' +
-                        '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "eraser" component}}"/>' +
-                    '</button>' +
+                '<form class="{{CSS.FORM}} atto_form">' +
                     '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
+                    '<div class="{{CSS.TOOLS}}">' +
+                        '<button class="{{CSS.DRAWLINE}}" type="button" title="{{get_string "draw_line" component}}">'+
+                            '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "pencil" component}}"/>'+
+                        '</button>' +
+                        '<button class="{{CSS.ERASER}}" type="button" title="{{get_string "eraser" component}}">' +
+                            '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "eraser" component}}"/>' +
+                        '</button>' +
+                    '</div>' +
                     '<button class="{{CSS.DONE}}" type="button">{{get_string "save_complete" component}}</button>' +
                     '<input type="hidden" class="{{CSS.INPUTALT}}" value="" id="{{elementid}}_{{CSS.INPUTALT}}" />' +
                     '<input type="hidden" class="{{CSS.INPUTWIDTH}}" value="" id="{{elementid}}_{{CSS.INPUTWIDTH}}" />' +
@@ -211,7 +215,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
 
         var dialogue = this.getDialogue({
             headerContent: M.util.get_string('dialogtitle', COMPONENTNAME),
-            width: '900px',
+            width: 'auto',
             focusAfterHide: true
         });
 
@@ -517,7 +521,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * @private
      */
     _eventSetLineColour: function (evt, colour) {
-    	this._lineSetColour(colour);
+        this._lineSetColour(colour);
     },
 
     /**
