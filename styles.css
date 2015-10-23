@@ -20,9 +20,97 @@
     position: absolute;
 	top: 0px;
 	right: 0px;
-	width: 64px
+	width: 100px;
 }
 
 .atto_racsdrawing_form {
 	position: relative;
+	width: 1280px;
+	height: 720px;
+}
+
+.atto_racsdrawing_toolpalleticon {
+	display: table-cell;
+	width: 40px;
+	height: 40px;
+	vertical-align: middle;
+	text-align: center;
+	border: 1px solid  black;
+}
+
+.atto_racsdrawing_toolpallettitle {
+	
+}
+
+.atto_racsdrawing_colour {
+	border-radius: 50%;
+	vertical-align: middle;
+	display: inline-block;
+	width:38px;
+	height:38px;
+}
+
+.atto_racsdrawing_brush {
+	border-radius: 50%;
+	vertical-align: middle;
+	display: inline-block;
+	background-color: black;
+}
+
+.atto_racsdrawing_brush1 {
+	width: 3px;
+	height: 3px;
+}
+
+.atto_racsdrawing_brush2 {
+	width: 8px;
+	height: 8px;
+}
+
+.atto_racsdrawing_brush3 {
+	width: 12px;
+	height: 12px;
+}
+
+.atto_racsdrawing_brush4 {
+	width: 18px;
+	height: 18px;
+}
+
+.atto_racsdrawing_colour1 {
+	background-color: black;
+}
+
+.atto_racsdrawing_colour2 {
+	background-color: orange;
+}
+
+.atto_racsdrawing_colour3 {
+	background-color: red;
+}
+
+.atto_racsdrawing_colour4 {
+	background-color: yellow;
+}
+
+.atto_racsdrawing_colour5 {
+	background-color: green;
+}
+
+.atto_racsdrawing_colour6 {
+	background-color: cyan;
+}
+
+.atto_racsdrawing_colour7 {
+	background-color: blue;
+}
+
+.atto_racsdrawing_colour8 {
+	background-color: purple;
+}
+
+.atto_racsdrawing_brush_selected,
+.atto_racsdrawing_tool_selected,
+.atto_racsdrawing_colour_selected {
+	background-color: rgba(82,129,194,0.3)
 }

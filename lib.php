@@ -30,14 +30,29 @@ function atto_racsdrawing_strings_for_js() {
     global $PAGE;
 
     $strings = array(
-        'draw_line',
+        'pencil',
         'eraser',
-        'save_complete',
+        'save',
         'pluginname',
         'dialogtitle',
-        'small_brush',
-        'medium_brush',
-        'large_brush'
+        'brush1',
+        'brush2',
+        'brush3',
+        'brush4',
+        'colour1',
+        'colour2',
+        'colour3',
+        'colour4',
+        'colour5',
+        'colour6',
+        'colour7',
+        'colour8',
+        'title_tools',
+        'title_tool_sizes',
+        'title_colours',
+        'cancel',
+        'draw_box',
+        'enter_text'
     );
 
     $PAGE->requires->strings_for_js($strings, 'atto_racsdrawing');

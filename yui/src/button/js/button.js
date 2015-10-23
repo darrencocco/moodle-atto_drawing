@@ -38,7 +38,7 @@ var COMPONENTNAME = 'atto_racsdrawing',
         DRAWLINE: 'atto_racsdrawing_drawline',
         ERASER: 'atto_racsdrawing_eraser',
         CANVAS: 'atto_racsdrawing_canvas',
-        DONE: 'atto_racsdrawing_done',
+        SAVE: 'atto_racsdrawing_save',
         INPUTALT: 'atto_racsdrawing_inputalt',
         INPUTWIDTH: 'atto_racsdrawing_inputwidth',
         INPUTHEIGHT: 'atto_racsdrawing_inputheight',
@@ -47,10 +47,27 @@ var COMPONENTNAME = 'atto_racsdrawing',
         FORM: 'atto_racsdrawing_form',
         TOOLSGROUP: 'atto_racsdrawing_tools',
         BRUSHSIZEGROUP: 'atto_racsdrawing_brushes',
-        SMALLBRUSH: 'atto_racsdrawing_smallbrush',
-        MEDIUMBRUSH: 'atto_racsdrawing_mediumbrush',
-        LARGEBRUSH: 'atto_racsdrawing_largebrush'
-
+        BRUSH1: 'atto_racsdrawing_brush1',
+        BRUSH2: 'atto_racsdrawing_brush2',
+        BRUSH3: 'atto_racsdrawing_brush3',
+        BRUSH4: 'atto_racsdrawing_brush4',
+        ICON: 'atto_racsdrawing_toolpalleticon',
+        PALLETSECTIONTITLE: 'atto_racsdrawing_toolpallettitle',
+        COLOURGROUP: 'atto_racsdrawing_colours',
+        COLOUR: 'atto_racsdrawing_colour',
+        COLOUR1: 'atto_racsdrawing_colour1',
+        COLOUR2: 'atto_racsdrawing_colour2',
+        COLOUR3: 'atto_racsdrawing_colour3',
+        COLOUR4: 'atto_racsdrawing_colour4',
+        COLOUR5: 'atto_racsdrawing_colour5',
+        COLOUR6: 'atto_racsdrawing_colour6',
+        COLOUR7: 'atto_racsdrawing_colour7',
+        COLOUR8: 'atto_racsdrawing_colour8',
+        SELECTEDCOLOUR: 'atto_racsdrawing_colour_selected',
+        SELECTEDTOOL: 'atto_racsdrawing_tool_selected',
+        BRUSH: 'atto_racsdrawing_brush',
+        SELECTEDBRUSHSIZE: 'atto_racsdrawing_brush_selected',
+        TOOL: 'atto_racsdrawing_tool'
     },
     REGEX = {
             ISPERCENT: /\d+%/
@@ -92,40 +109,107 @@ var COMPONENTNAME = 'atto_racsdrawing',
                       value: 'style'
                   }
               ],
-    COLOUR = {
-            WHITE: '#FFFFFF',
-            BLACK: '#000000'
-        },
-    WIDTH = {
-            SMALL: 3,
-            MEDIUM: 8,
-            LARGE: 12
-        },
     TEMPLATE = '' +
                 '<form class="{{CSS.FORM}} atto_form">' +
                     '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
                     '<div class="{{CSS.TOOLS}}">' +
                         '<div class="{{CSS.TOOLSGROUP}}">' +
-                            '<button class="{{CSS.DRAWLINE}} radio" type="button" title="{{get_string "draw_line" component}}">'+
-                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "pencil" component}}"/>'+
-                            '</button>' +
-                            '<button class="{{CSS.ERASER}} radio" type="button" title="{{get_string "eraser" component}}">' +
-                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "eraser" component}}"/>' +
-                            '</button>' +
+                            '<h4 class="{{CSS.PALLETSECTIONTITLE}}">{{get_string "title_tools" component}}</h4>' +
+                            '<table><tbody>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<img class="{{CSS.TOOL}} {{CSS.DRAWLINE}}" data-tool="draw" src="{{image_url "pencil" component}}" title="{{get_string "pencil" component}}"/>'+
+                            '</div>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<img class="{{CSS.TOOL}} {{CSS.ERASER}}" data-tool="erase" src="{{image_url "eraser" component}}" title="{{get_string "eraser" component}}"/>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<img class="{{CSS.TOOL}} {{CSS.TEXT}}" data-tool="text" src="{{image_url "entertext" component}}"  title="{{get_string "enter_text" component}}"/>' +
+                            '</div>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<img class="{{CSS.TOOL}} {{CSS.BOX}}" data-tool="box" src="{{image_url "drawbox" component}}" title="{{get_string "draw_box" component}}"/>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<img class="{{CSS.TOOL}} {{CSS.SAVE}}" data-tool="save" src="{{image_url "save" component}}" title="{{get_string "save" component}}"/>' +
+                            '</div>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<img class="{{CSS.TOOL}} {{CSS.CANCEL}}" data-tool="cancel" src="{{image_url "cancel" component}}" title="{{get_string "cancel" component}}"/>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '</tbody></table>' +
                         '</div>' +
                         '<div class="{{CSS.BRUSHSIZEGROUP}}">' +
-                            '<button class="{{CSS.SMALLBRUSH}} radio" type="button" title="{{get_string "small_brush" component}}">' +
-                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "small_brush" component}}"/>' +
+                            '<h4 class="{{CSS.PALLETSECTIONTITLE}}">{{get_string "title_tool_sizes" component}}</h4>' +
+                            '<table><tbody>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}" title="{{get_string "brush1" component}}">' +
+                                '<div class="{{CSS.BRUSH}} {{CSS.BRUSH1}}" title="{{get_string "brush1" component}}"></div>' +
                             '</button>' +
-                            '<button class="{{CSS.MEDIUMBRUSH}} radio" type="button" title="{{get_string "medium_brush" component}}">' +
-                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "medium_brush" component}}"/>' +
-                            '</button>' +
-                            '<button class="{{CSS.LARGEBRUSH}} radio" type="button" title="{{get_string "large_brush" component}}">' +
-                                '<img class="icon" aria-hidden="true" role="presentation" width="32" height="32" src="{{image_url "large_brush" component}}"/>' +
-                            '</button>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}" title="{{get_string "brush2" component}}">' +
+                                '<div class="{{CSS.BRUSH}} {{CSS.BRUSH2}}" title="{{get_string "brush2" component}}"></div>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}" title="{{get_string "brush3" component}}">' +
+                                '<div class="{{CSS.BRUSH}} {{CSS.BRUSH3}}" title="{{get_string "brush3" component}}"></div>' +
+                            '</div>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}" title="{{get_string "brush4" component}}">' +
+                                '<div class="{{CSS.BRUSH}} {{CSS.BRUSH4}}" title="{{get_string "brush4" component}}"></div>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '</tbody></table>' +
+                        '</div>' +
+                        '<div class="{{CSS.COLOURGROUP}}">' +
+                            '<h4 class="{{CSS.PALLETSECTIONTITLE}}">{{get_string "title_colours" component}}</h4>' +
+                            '<table><tbody>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<div class="{{CSS.COLOUR}} {{CSS.COLOUR1}}" title="{{get_string "colour1" component}}"></div>' +
+                            '</div>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<div class="{{CSS.COLOUR}} {{CSS.COLOUR2}}" title="{{get_string "colour2" component}}"></div>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<div class="{{CSS.COLOUR}} {{CSS.COLOUR3}}" title="{{get_string "colour3" component}}"></div>' +
+                            '</div>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<div class="{{CSS.COLOUR}} {{CSS.COLOUR4}}" title="{{get_string "colour4" component}}"></div>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<div class="{{CSS.COLOUR}} {{CSS.COLOUR5}}" title="{{get_string "colour5" component}}"></div>' +
+                            '</div>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<div class="{{CSS.COLOUR}} {{CSS.COLOUR6}}" title="{{get_string "colour6" component}}"></div>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '<tr><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<div class="{{CSS.COLOUR}} {{CSS.COLOUR7}}" title="{{get_string "colour7" component}}"></div>' +
+                            '</div>' +
+                            '</td><td>' +
+                            '<div class="{{CSS.ICON}}">' +
+                                '<div class="{{CSS.COLOUR}} {{CSS.COLOUR8}}" title="{{get_string "colour8" component}}"></div>' +
+                            '</div>' +
+                            '</td</tr>' +
+                            '</tbody></table>' +
                         '</div>' +
                     '</div>' +
-                    '<button class="{{CSS.DONE}}" type="button">{{get_string "save_complete" component}}</button>' +
                     '<input type="hidden" class="{{CSS.INPUTALT}}" value="" id="{{elementid}}_{{CSS.INPUTALT}}" />' +
                     '<input type="hidden" class="{{CSS.INPUTWIDTH}}" value="" id="{{elementid}}_{{CSS.INPUTWIDTH}}" />' +
                     '<input type="hidden" class="{{CSS.INPUTHEIGHT}}" value="" id="{{elementid}}_{{CSS.INPUTHEIGHT}}" />' +
@@ -215,6 +299,24 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      */
     _strokeColour: null,
 
+    /**
+     * The colour to be used for drawing actions.
+     *
+     * @param _colour
+     * @type String
+     * @private
+     */
+    _colour: null,
+
+    /**
+     * The currently selected tool.
+     *
+     * @param _selectedTool
+     * @type String
+     * @private
+     */
+    _selectedTool: null,
+
     initializer: function() {
         this.addButton({
             icon: 'icon',
@@ -250,8 +352,6 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         // Set the dialogue content, and then show the dialogue.
         dialogue.set('bodyContent', this._getDialogueContent())
                 .show();
-        this.colourButtonGroup.render();
-        this.widthButtonGroup.render();
     },
 
     /**
@@ -267,8 +367,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             content = Y.Node.create(template({
                 elementid: this.get('host').get('elementid'),
                 CSS: CSS,
-                component: COMPONENTNAME,
-                COLOUR: COLOUR
+                component: COMPONENTNAME
             }));
 
         this._form = content;
@@ -279,23 +378,21 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         this._strokeWidth = null;
         this._strokeColour = null;
 
-        this._form.one('.' + CSS.DRAWLINE).on('click', this._eventSetLineColour, this, COLOUR.BLACK);
-        this._form.one('.' + CSS.ERASER).on('click', this._eventSetLineColour, this, COLOUR.WHITE);
-        this._form.one('.' + CSS.SMALLBRUSH).on('click', this._eventSetLineWidth, this, WIDTH.SMALL);
-        this._form.one('.' + CSS.MEDIUMBRUSH).on('click', this._eventSetLineWidth, this, WIDTH.MEDIUM);
-        this._form.one('.' + CSS.LARGEBRUSH).on('click', this._eventSetLineWidth, this, WIDTH.LARGE);
-        this._form.one('.' + CSS.DONE).on('click', this._setImage, this);
+        this._form.all('.' + CSS.TOOL).each(function(node) {
+            node.ancestor().on('click', this._eventSetTool, this, node);
+        }, this);
+        this._form.all('.' + CSS.BRUSH).each(function(node) {
+            node.ancestor().on('click', this._eventSetLineWidth, this, node);
+        }, this);
+        this._form.all('.' + CSS.COLOUR).each(function(node) {
+            node.ancestor().on('click', this._eventSetLineColour, this, node);
+        }, this);
+        
+        //Starts drawing process
         this._form.one('.' + CSS.CANVAS).on('mousedown', this._draw, this);
+        //Keeps track of mouse position. Should I attach detach this instead so it only tracks when necessary.
         this._form.one('.' + CSS.CANVAS).on('mousemove', this._updateMousePosition, this);
 
-        this.colourButtonGroup = new Y.ButtonGroup({
-            srcNode: this._form.one('.' + CSS.TOOLSGROUP),
-            type: 'radio'
-        });
-        this.widthButtonGroup = new Y.ButtonGroup({
-            srcNode: this._form.one('.' + CSS.BRUSHSIZEGROUP),
-            type: 'radio'
-        });
         return content;
     },
 
@@ -343,10 +440,9 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * Update the image in the contenteditable.
      *
      * @method _setImage
-     * @param {EventFacade} e
      * @private
      */
-    _setImage: function(e) {
+    _setImage: function() {
         var form = this._form,
             url = form.one('.' + CSS.CANVAS)._node.toDataURL(),
             alt = form.one('.' + CSS.INPUTALT).get('value'),
@@ -360,8 +456,6 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             template,
             classlist = [],
             host = this.get('host');
-
-        e.preventDefault();
 
         // Focus on the editor in preparation for inserting the image.
         host.focus();
@@ -472,6 +566,34 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
     },
 
     /**
+     * Starts the "drawing" function depending on what tool
+     * is selected
+     *
+     * @method _draw
+     * @private
+     */
+    _draw: function() {
+        switch(this._selectedTool) {
+        case 'erase':
+            this._lineSetColour('white');
+            this._setupDrawLine();
+            break;
+        case 'draw':
+            this._lineSetColour(this._colour);
+            this._setupDrawLine();
+            break;
+        case 'box':
+            break;
+        case 'text':
+            break;
+        case 'save':
+            break;
+        case 'cancel':
+            break;
+        }
+    },
+    
+    /**
      * Handles the the lifecycle of drawing a line.
      *
      * Sets _lastMouse starting point then sets up
@@ -480,21 +602,21 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * if the mouse leaves the canvas area or if the mouse
      * button is released.
      *
-     * @method _draw
+     * @method _setupDrawLine
      * @private
      */
-    _draw: function() {
+    _setupDrawLine:function () {
+        if(this._strokeWidth === null || this._strokeColour === null) {
+            return;
+        }
         var canvasNode = this._form.one('.' + CSS.CANVAS),
             intervalDraw,
             underlyingNode = canvasNode._node,
             self = this;
-        if(this._strokeWidth === null || this._strokeColour === null) {
-            return;
-        }
         this._lastMouse = {
-                    x: this._mouse.x,
-                    y: this._mouse.y
-                };
+                x: this._mouse.x,
+                y: this._mouse.y
+            };
         intervalDraw = setInterval(function(){self._drawLine(underlyingNode.getContext('2d'));}, 10);
 
         canvasNode.on('mouseup', function(){clearInterval(this);}, intervalDraw);
@@ -565,11 +687,17 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      *
      * @method _eventSetLineColour
      * @param {Event} evt
-     * @param {String} colour
+     * @param {Node} node
      * @private
      */
-    _eventSetLineColour: function (evt, colour) {
-        this._lineSetColour(colour);
+    _eventSetLineColour: function (evt, node) {
+        var currentSelectedColourNode = this._form.one('.'+CSS.SELECTEDCOLOUR),
+            colour = node.getStyle('backgroundColor');
+        if (currentSelectedColourNode !== null) {
+            currentSelectedColourNode.removeClass(CSS.SELECTEDCOLOUR);
+        }
+        node.ancestor().addClass(CSS.SELECTEDCOLOUR);
+        this._setColour(colour);
     },
 
     /**
@@ -582,6 +710,17 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
     _lineSetColour: function(colour) {
         this._strokeColour = colour;
     },
+    
+    /**
+     * Sets the colour for drawing, text etc.
+     *
+     * @method _setColour
+     * @param {String} colour
+     * @private
+     */
+    _setColour: function(colour) {
+        this._colour = colour;
+    },
 
     /**
      * Captures the the button click event for changing
@@ -592,7 +731,16 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * @param {String} width
      * @private
      */
-    _eventSetLineWidth: function (evt, width) {
+    _eventSetLineWidth: function (evt, node) {
+        var currentSelectedSizeNode = this._form.one('.'+CSS.SELECTEDBRUSHSIZE),
+            width = node.getStyle('width');
+        if (currentSelectedSizeNode !== null) {
+            currentSelectedSizeNode.removeClass(CSS.SELECTEDBRUSHSIZE);
+        }
+        node.ancestor().addClass(CSS.SELECTEDBRUSHSIZE);
+        if (width.indexOf('px') !== -1) {
+            width = width.substring(0, width.length-2);
+        }
         this._lineSetWidth(width);
     },
 
@@ -605,5 +753,31 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      */
     _lineSetWidth: function(width) {
         this._strokeWidth = width;
+    },
+    
+    _eventSetTool: function(evt, node) {
+        var currentSelectedToolNode = this._form.one('.' + CSS.SELECTEDTOOL),
+            toolName = node.getData('tool');
+        if (currentSelectedToolNode !== null) {
+            currentSelectedToolNode.removeClass(CSS.SELECTEDTOOL);
+        }
+        node.ancestor().addClass(CSS.SELECTEDTOOL);
+        this._selectedTool = toolName;
+        switch (toolName) {
+        case 'erase':
+            this._lineSetColour('white');
+            break;
+        case 'draw':
+            break;
+        case 'box':
+            break;
+        case 'text':
+            break;
+        case 'save':
+            this._setImage();
+            break;
+        case 'cancel':
+            break;
+        }
     }
 });

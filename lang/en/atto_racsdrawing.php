@@ -20,11 +20,26 @@
  * @package    atto_racsdrawing
  * @copyright  2015 Darren Cocco - Royal Australasian College of Surgeons  <darren.cocco@surgeons.org>
  */
-$string['draw_line'] = "Draw a line";
+$string['pencil'] = "Draw a line";
 $string['eraser'] = "Erase";
-$string['save_complete'] = "Save";
+$string['save'] = "Save";
+$string['cancel'] = "Don't save";
+$string['enter_text'] = "Insert text";
+$string['draw_box'] = "Draw a box";
 $string['pluginname'] = 'Drawing';
 $string['dialogtitle'] = "RACS Sketching Tool";
-$string['small_brush'] = "Small";
-$string['medium_brush'] = "Medium";
-$string['large_brush'] = "Large";
+$string['brush1'] = "Small";
+$string['brush2'] = "Medium";
+$string['brush3'] = "Large";
+$string['brush4'] = "Extra Large";
+$string['colour1'] = "Black";
+$string['colour2'] = "Orange";
+$string['colour3'] = "Red";
+$string['colour4'] = "Yellow";
+$string['colour5'] = "Green";
+$string['colour6'] = "Cyan";
+$string['colour7'] = "Blue";
+$string['colour8'] = "Purple";
+$string['title_tools'] = "Tools";
+$string['title_tool_sizes'] = "Tool size";
+$string['title_colours'] = "Colours";
