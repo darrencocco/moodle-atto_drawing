@@ -587,6 +587,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         case 'text':
             break;
         case 'save':
+        	this._setImage();
             break;
         case 'cancel':
             break;
