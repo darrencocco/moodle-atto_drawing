@@ -114,3 +114,21 @@
 .atto_racsdrawing_colour_selected {
 	background-color: rgba(82,129,194,0.3)
 }
+
+.atto_racsdrawing_layersystem {
+	position:relative;
+}
+
+.atto_racsdrawing_canvas1 {
+	position:absolute; 
+	left: 0; 
+	top:0; 
+	z-index:0;
+}
+
+.atto_racsdrawing_canvas2 {
+	position:absolute; 
+	left: 0; 
+	top:0; 
+	z-index:1;
+}

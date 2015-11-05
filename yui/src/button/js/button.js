@@ -37,7 +37,10 @@ var COMPONENTNAME = 'atto_racsdrawing',
     CSS = {
         DRAWLINE: 'atto_racsdrawing_drawline',
         ERASER: 'atto_racsdrawing_eraser',
+        LAYERSYSTEM: 'atto_racsdrawing_layersystem',
         CANVAS: 'atto_racsdrawing_canvas',
+        CANVAS1: 'atto_racsdrawing_canvas1',
+        CANVAS2: 'atto_racsdrawing_canvas2',
         SAVE: 'atto_racsdrawing_save',
         INPUTALT: 'atto_racsdrawing_inputalt',
         INPUTWIDTH: 'atto_racsdrawing_inputwidth',
@@ -111,7 +114,10 @@ var COMPONENTNAME = 'atto_racsdrawing',
               ],
     TEMPLATE = '' +
                 '<form class="{{CSS.FORM}} atto_form">' +
-                    '<canvas class="{{CSS.CANVAS}}" width="800" height="600"></canvas>' +
+                    '<div class="{{CSS.LAYERSYSTEM}}">' +
+                        '<canvas class="{{CSS.CANVAS1}}" width="800" height="600"></canvas>' +
+                        '<canvas class="{{CSS.CANVAS2}}" width="800" height="600"></canvas>' +
+                    '</div>' +
                     '<div class="{{CSS.TOOLS}}">' +
                         '<div class="{{CSS.TOOLSGROUP}}">' +
                             '<h4 class="{{CSS.PALLETSECTIONTITLE}}">{{get_string "title_tools" component}}</h4>' +
@@ -389,9 +395,9 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         }, this);
         
         //Starts drawing process
-        this._form.one('.' + CSS.CANVAS).on('mousedown', this._draw, this);
+        this._form.one('.' + CSS.CANVAS2).on('mousedown', this._draw, this);
         //Keeps track of mouse position. Should I attach detach this instead so it only tracks when necessary.
-        this._form.one('.' + CSS.CANVAS).on('mousemove', this._updateMousePosition, this);
+        this._form.one('.' + CSS.CANVAS2).on('mousemove', this._updateMousePosition, this);
 
         return content;
     },
@@ -427,9 +433,11 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             //This should theoritically load the already existing image into the drawing panel.
             theImage = new Image();
             theImage.src = properties.src;
-            form.one('.' + CSS.CANVAS).setAttribute('height', theImage.height);
-            form.one('.' + CSS.CANVAS).setAttribute('width', theImage.width);
-            form.one('.' + CSS.CANVAS)._node.getContext('2d').drawImage(theImage, 0, 0);
+            form.one('.' + CSS.CANVAS1).setAttribute('height', theImage.height);
+            form.one('.' + CSS.CANVAS1).setAttribute('width', theImage.width);
+            form.one('.' + CSS.CANVAS2).setAttribute('height', theImage.height);
+            form.one('.' + CSS.CANVAS2).setAttribute('width', theImage.width);
+            form.one('.' + CSS.CANVAS1)._node.getContext('2d').drawImage(theImage, 0, 0);
         }
 
         // Update the image preview based on the form properties.
@@ -444,7 +452,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      */
     _setImage: function() {
         var form = this._form,
-            url = form.one('.' + CSS.CANVAS)._node.toDataURL(),
+            url = form.one('.' + CSS.CANVAS1)._node.toDataURL(),
             alt = form.one('.' + CSS.INPUTALT).get('value'),
             width = form.one('.' + CSS.INPUTWIDTH).get('value'),
             height = form.one('.' + CSS.INPUTHEIGHT).get('value'),
@@ -583,15 +591,72 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             this._setupDrawLine();
             break;
         case 'box':
+        	this._lineSetColour(this._colour);
+        	this._setupDrawSquare();
             break;
         case 'text':
             break;
         case 'save':
-        	this._setImage();
+            this._setImage();
             break;
         case 'cancel':
             break;
         }
+    },
+    
+    /**
+     * Sets up the square drawing tool.
+     * 
+     * checks if _strokeColour & _strokeWidth have been selected, if not then return.
+     * sets which canvas layer to draw the square onto.
+     * records where mouse was first clicked.
+     */
+    _setupDrawSquare: function() {
+        if(this._strokeColour === null || this._strokeWidth === null) {
+            return;
+        }
+        var canvasNode = this._form.one('.' + CSS.CANVAS1),
+            captureCanvasNode = this._form.one('.' + CSS.CANVAS2),
+            intervalDraw,
+            underlyingNode = canvasNode._node,
+            captureNode = captureCanvasNode._node,
+            self = this;
+        this._lastMouse = {
+                x: this._mouse.x,
+                y: this._mouse.y
+        };
+        intervalDraw = setInterval(function(){self._drawSquare(captureNode);}, 10);
+        
+        this._squareMouseUp = captureCanvasNode.on('mouseup', this._finaliseSquare, this, underlyingNode, captureNode, intervalDraw);
+        this._squareMouseLeave = captureCanvasNode.on('mouseleave', this._finaliseSquare, this, underlyingNode, captureNode, intervalDraw);
+    },
+    
+    _drawSquare: function(node) {
+        var context = node.getContext('2d');
+        context.clearRect(0,0, node.width, node.height);
+        var width = this._mouse.x - this._lastMouse.x,
+            height = this._mouse.y - this._lastMouse.y;
+        context.lineWidth = this._strokeWidth;
+        context.strokeStyle = this._strokeColour;
+        context.strokeRect(this._lastMouse.x,this._lastMouse.y, width, height);
+    },
+    
+    _finaliseSquare: function(evt, canvasNode, captureCanvasNode, intervalDraw) {
+    	clearInterval(intervalDraw);
+    	this._clearSquare(captureCanvasNode);
+    	var context = canvasNode.getContext('2d');
+        var width = this._mouse.x - this._lastMouse.x,
+            height = this._mouse.y - this._lastMouse.y;
+        context.lineWidth = this._strokeWidth;
+        context.strokeStyle = this._strokeColour;
+        context.strokeRect(this._lastMouse.x,this._lastMouse.y, width, height);
+        this._squareMouseLeave.detach();
+        this._squareMouseUp.detach();
+    },
+    
+    _clearSquare: function(node) {
+    	var context = node.getContext('2d');
+    	context.clearRect(0,0, node.width, node.height);
     },
     
     /**
@@ -610,7 +675,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         if(this._strokeWidth === null || this._strokeColour === null) {
             return;
         }
-        var canvasNode = this._form.one('.' + CSS.CANVAS),
+        var canvasNode = this._form.one('.' + CSS.CANVAS1),
+            captureCanvasNode = this._form.one('.' + CSS.CANVAS2),
             intervalDraw,
             underlyingNode = canvasNode._node,
             self = this;
@@ -620,8 +686,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             };
         intervalDraw = setInterval(function(){self._drawLine(underlyingNode.getContext('2d'));}, 10);
 
-        canvasNode.on('mouseup', function(){clearInterval(this);}, intervalDraw);
-        canvasNode.on('mouseleave', function(){clearInterval(this);}, intervalDraw);
+        captureCanvasNode.on('mouseup', function(){clearInterval(this);}, intervalDraw);
+        captureCanvasNode.on('mouseleave', function(){clearInterval(this);}, intervalDraw);
     },
 
     /**
@@ -632,7 +698,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * @private
      */
     _updateMousePosition: function (evt) {
-        var canvas = this._form.one('.' + CSS.CANVAS)._node,
+        var canvas = this._form.one('.' + CSS.CANVAS2)._node,
             position = this._getMousePosition(evt, canvas);
         this._mouse.x = position.x;
         this._mouse.y = position.y;
