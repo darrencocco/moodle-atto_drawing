@@ -610,6 +610,9 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * checks if _strokeColour & _strokeWidth have been selected, if not then return.
      * sets which canvas layer to draw the square onto.
      * records where mouse was first clicked.
+     * declares an interval that updates the structure of the drawn shape.
+     * declares to stop drawing the square when the user stops clicking the mouse,
+     * or the mouse leaves the boundries of the canvas.
      */
     _setupDrawSquare: function() {
         if(this._strokeColour === null || this._strokeWidth === null) {
@@ -631,9 +634,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         this._squareMouseLeave = captureCanvasNode.on('mouseleave', this._finaliseSquare, this, underlyingNode, captureNode, intervalDraw);
     },
     
-    _drawSquare: function(node) {
-        var context = node.getContext('2d');
-        context.clearRect(0,0, node.width, node.height);
+    _square: function(context) {
         var width = this._mouse.x - this._lastMouse.x,
             height = this._mouse.y - this._lastMouse.y;
         context.lineWidth = this._strokeWidth;
@@ -641,20 +642,38 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         context.strokeRect(this._lastMouse.x,this._lastMouse.y, width, height);
     },
     
+    /**
+     * Basically draws a square/rectangle
+     * 
+     * constantly draws and erases the square after each interval.
+     */
+    _drawSquare: function(node) {
+        var context = node.getContext('2d');
+        this._clearCanvas(node);
+        this._square(context);
+    },
+    
+    /**
+     * Finalises the square/rectangles overall shape upon _mouseUp
+     * 
+     * posts the square from CANVAS2 onto CANVAS1 and clears CANVAS2
+     * records the selected stroke colour and width for when the function is exectued
+     * records the final x & y value for then the function is exectued
+     * detaches itself from the function upon _mouseUp or _MouseLeave, as to not glitch and keep drawing the square when not supposed to
+     */
     _finaliseSquare: function(evt, canvasNode, captureCanvasNode, intervalDraw) {
     	clearInterval(intervalDraw);
-    	this._clearSquare(captureCanvasNode);
+    	this._clearCanvas(captureCanvasNode);
     	var context = canvasNode.getContext('2d');
-        var width = this._mouse.x - this._lastMouse.x,
-            height = this._mouse.y - this._lastMouse.y;
-        context.lineWidth = this._strokeWidth;
-        context.strokeStyle = this._strokeColour;
-        context.strokeRect(this._lastMouse.x,this._lastMouse.y, width, height);
+    	this._square(context);
         this._squareMouseLeave.detach();
         this._squareMouseUp.detach();
     },
     
-    _clearSquare: function(node) {
+    /**
+     * Clears passed in canvas
+     */
+    _clearCanvas: function(node) {
     	var context = node.getContext('2d');
     	context.clearRect(0,0, node.width, node.height);
     },
