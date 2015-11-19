@@ -69,7 +69,9 @@ var COMPONENTNAME = 'atto_racsdrawing',
         SELECTEDTOOL: 'atto_racsdrawing_tool_selected',
         BRUSH: 'atto_racsdrawing_brush',
         SELECTEDBRUSHSIZE: 'atto_racsdrawing_brush_selected',
-        TOOL: 'atto_racsdrawing_tool'
+        TOOL: 'atto_racsdrawing_tool',
+        TEXTINPUTCONTAINER: 'atto_racsdrawing_textinputcontainer',
+        TEXTINPUTFIELD: 'atto_racsdrawing_textinputfield'
     },
     REGEX = {
             ISPERCENT: /\d+%/
@@ -227,7 +229,11 @@ var COMPONENTNAME = 'atto_racsdrawing',
                     '{{#if presentation}}role="presentation" {{/if}}' +
                     'style="{{alignment}}{{margin}}{{customstyle}}"' +
                     '{{#if classlist}}class="{{classlist}}" {{/if}}' +
-                '/>';
+                '/>',
+    TEXTEDITORTEMPLATE = '' +
+                '<div class="{{CSS.TEXTINPUTCONTAINER}}" style="top:{{top}};left:{{left}};">' +
+                    '<input type="text" class="{{CSS.TEXTINPUTFIELD}}">' +
+                '</div>';
 
 
 Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_atto.EditorPlugin, [], {
@@ -594,6 +600,8 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             this._setupDrawSquare();
             break;
         case 'text':
+            this._lineSetColour("black");
+            this._setupEnterText();
             break;
         case 'save':
             this._setImage();
@@ -647,13 +655,11 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * @param {Node} node
      * @private
      */
-    _square: function(node) {
-        var context = node.getContext('2d'),
-            width = this._mouse.x - this._lastMouse.x,
-            height = this._mouse.y - this._lastMouse.y;
+    _square: function(node, boxDimensions) {
+        var context = node.getContext('2d');
         context.lineWidth = this._strokeWidth;
         context.strokeStyle = this._strokeColour;
-        context.strokeRect(this._lastMouse.x,this._lastMouse.y, width, height);
+        context.strokeRect(boxDimensions.left, boxDimensions.top, boxDimensions.width, boxDimensions.height);
     },
     
     /**
@@ -666,8 +672,14 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * @private
      */
     _drawSquareOverlay: function(node) {
+        var boxDimensions = {
+                top: this._mouse.y < this._lastMouse.y ? this._mouse.y : this._lastMouse.y,
+                left: this._mouse.x < this._lastMouse.x ? this._mouse.x : this._lastMouse.x,
+                height: Math.abs(this._mouse.y - this._lastMouse.y),
+                width: Math.abs(this._mouse.x - this._lastMouse.x)
+            };
         this._clearCanvas(node);
-        this._square(node);
+        this._square(node, boxDimensions);
     },
     
     /**
@@ -684,13 +696,19 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
      * @private
      */
     _drawSquare: function(evt, underlyingNode, captureNode, intervalDraw) {
+        var boxDimensions = {
+                top: this._mouse.y < this._lastMouse.y ? this._mouse.y : this._lastMouse.y,
+                left: this._mouse.x < this._lastMouse.x ? this._mouse.x : this._lastMouse.x,
+                height: Math.abs(this._mouse.y - this._lastMouse.y),
+                width: Math.abs(this._mouse.x - this._lastMouse.x)
+            };
         this._squareMouseLeave.detach();
         this._squareMouseUp.detach();
         this._squareMouseLeave = null;
         this._squareMouseUp = null;
         clearInterval(intervalDraw);
         this._clearCanvas(captureNode);
-        this._square(underlyingNode);
+        this._square(underlyingNode, boxDimensions);
     },
     
     /**
@@ -892,5 +910,105 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         case 'cancel':
             break;
         }
+    },
+    
+    _setupEnterText: function() {
+        if(this._strokeColour === null || this._strokeWidth === null) {
+            return;
+        }
+        var canvasNode = this._form.one('.' + CSS.CANVAS1),
+            captureCanvasNode = this._form.one('.' + CSS.CANVAS2),
+            intervalDraw,
+            underlyingNode = canvasNode._node,
+            captureNode = captureCanvasNode._node,
+            self = this;
+        this._lastMouse = {
+                x: this._mouse.x,
+                y: this._mouse.y
+        };
+        intervalDraw = setInterval(function(){self._drawSquareOverlay(captureNode);}, 10);
+        
+        this._squareMouseUp = captureCanvasNode.on('mouseup', this._setupTextEditor, this, captureNode, underlyingNode, intervalDraw);
+        this._squareMouseLeave = captureCanvasNode.on('mouseleave', this._setupTextEditor, this, captureNode, underlyingNode, intervalDraw);
+    },
+    
+    _setupTextEditor: function(evt, captureNode, underlyingNode, intervalDraw) {
+        var template = Y.Handlebars.compile(TEXTEDITORTEMPLATE),
+            boxDimensions = {
+                top: this._mouse.y < this._lastMouse.y ? this._mouse.y : this._lastMouse.y,
+                left: this._mouse.x < this._lastMouse.x ? this._mouse.x : this._lastMouse.x,
+                height: Math.abs(this._mouse.y - this._lastMouse.y),
+                width: Math.abs(this._mouse.x - this._lastMouse.x)
+            },
+            editorTemplate = Y.Node.create(template({
+                CSS: CSS,
+                top: boxDimensions.top+boxDimensions.height+"px",
+                left: boxDimensions.left+"px"
+            })),
+            editor,
+            inputBox;
+        this._squareMouseLeave.detach();
+        this._squareMouseUp.detach();
+        this._squareMouseLeave = null;
+        this._squareMouseUp = null;
+        clearInterval(intervalDraw);
+        editor = this._form.one('.'+CSS.LAYERSYSTEM).appendChild(editorTemplate);
+        inputBox = editor.one('.'+CSS.TEXTINPUTFIELD);
+        inputBox.on('keyup', this._textEditorUpdate, this, inputBox, captureNode, boxDimensions);
+        inputBox.on('keypress', this._textEditorEscapeKeys, this, inputBox);
+        inputBox.on('blur', this._textEditorCleanup, this, inputBox, captureNode, underlyingNode, boxDimensions);
+        inputBox.focus();
+    },
+    
+    _textEditorEscapeKeys: function(evt, inputBox) {
+        var key = evt.which;
+        if (key === 13) {
+            evt.preventDefault();
+            inputBox.blur();
+            return;
+        }
+    },
+    
+    _textEditorUpdate: function(evt, inputBox, captureNode, boxDimensions) {
+        this._clearCanvas(captureNode);
+        this._writeTextToCanvas(inputBox.get('value'), captureNode, boxDimensions.top, boxDimensions.left, boxDimensions.width);
+    },
+    
+    _textEditorCleanup: function(evt, inputBox, captureNode, underlyingNode, boxDimensions) {
+        var text = inputBox.get('value');
+        inputBox.ancestor().remove(true);
+        this._clearCanvas(captureNode);
+        this._writeTextToCanvas(text, underlyingNode, boxDimensions.top, boxDimensions.left, boxDimensions.width);
+    },
+    
+    _writeTextToCanvas: function(text, canvas, top, left, width, textProperties) {
+        var textProperties = textProperties||{height: 16, font: "Arial", lineSpacing: 1.1},
+            fontStyle = textProperties.height+"px "+textProperties.font,
+            textBlock = this._textSplitter(canvas, text, width, textProperties),
+            context = canvas.getContext("2d"),
+            offset = 0;
+        context.font = fontStyle;
+        context.textBaseline = "hanging";
+        textBlock.forEach(function(line) {
+            context.fillText(line, left, top+offset);
+            offset += textProperties.height * textProperties.lineSpacing;
+        });
+    },
+    
+    _textSplitter: function(canvas, text, width, fontStyle) {
+        var words = text.split(" "),
+            context = canvas.getContext("2d"),
+            sentenceFragments = [''],
+            suggestedSentence = '';
+        context.font = fontStyle;
+        words.forEach(function(word) {
+            suggestedSentence = (sentenceFragments[sentenceFragments.length - 1] + ' ' + word).trim();
+            if (context.measureText(suggestedSentence).width < width) {
+                sentenceFragments[sentenceFragments.length - 1] = suggestedSentence;
+            } else {
+                sentenceFragments.push(word);
+            }
+        });
+        return sentenceFragments;
     }
 });
