@@ -1,9 +1,34 @@
 {
-  "name": "moodle-atto_racsdrawing-button",
+  "name": "moodle-atto_racsdrawing",
   "builds": {
     "moodle-atto_racsdrawing-button": {
       "jsfiles": [
         "button.js"
+      ]
+    },
+    "moodle-atto_racsdrawing-shared_lib": {
+      "jsfiles": [
+        "shared.js"
+      ]
+    },
+    "moodle-atto_racsdrawing-square_lib": {
+      "jsfiles": [
+        "square.js"
+      ]
+    },
+    "moodle-atto_racsdrawing-text_lib": {
+      "jsfiles": [
+        "text.js"
+      ]
+    },
+    "moodle-atto_racsdrawing-line_lib": {
+      "jsfiles": [
+        "line.js"
+      ]
+    },
+    "moodle-atto_racsdrawing-io_lib": {
+      "jsfiles": [
+        "io.js"
       ]
     }
   }

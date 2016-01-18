@@ -2,7 +2,12 @@
     "moodle-atto_racsdrawing-button": {
         "requires": [
             "moodle-editor_atto-plugin",
-            "button-group"
+            "button-group",
+            "moodle-atto_racsdrawing-shared_lib",
+            "moodle-atto_racsdrawing-square_lib",
+            "moodle-atto_racsdrawing-text_lib",
+            "moodle-atto_racsdrawing-line_lib",
+            "moodle-atto_racsdrawing-io_lib"
         ]
     }
 }
