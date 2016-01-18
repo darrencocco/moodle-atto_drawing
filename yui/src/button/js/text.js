@@ -94,11 +94,12 @@ AttoRacsDrawingTextLib.prototype = {
     _writeTextToCanvas: function(text, canvas, top, left, width, textProperties) {
         var textProperties = textProperties||{height: 16, font: "Arial", lineSpacing: 1.1},
             fontStyle = textProperties.height+"px "+textProperties.font,
-            textBlock = this._textSplitter(canvas, text, width, textProperties),
+            textBlock = null,
             context = canvas.getContext("2d"),
             offset = 0;
         context.font = fontStyle;
         context.textBaseline = "hanging";
+        textBlock = this._textSplitter(canvas, text, width, textProperties);
         textBlock.forEach(function(line) {
             context.fillText(line, left, top+offset);
             offset += textProperties.height * textProperties.lineSpacing;
