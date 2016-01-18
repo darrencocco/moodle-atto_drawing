@@ -1,9 +1,4 @@
-var AttoRacsDrawingTextLib = Y.namespace('M.atto_racsdrawing').TextLib = function(){},
-    TEXTEDITORTEMPLATE = '' +
-        '<div class="{{CSS.TEXTINPUTCONTAINER}}" style="top:{{top}};left:{{left}};">' +
-            '<input type="text" class="{{CSS.TEXTINPUTFIELD}}">' +
-        '</div>';
-//This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +18,12 @@ var AttoRacsDrawingTextLib = Y.namespace('M.atto_racsdrawing').TextLib = functio
  * @copyright  2015 Darren Cocco - Royal Australasian College of Surgeons  <darren.cocco@surgeons.org>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+var AttoRacsDrawingTextLib = Y.namespace('M.atto_racsdrawing').TextLib = function(){},
+    TEXTEDITORTEMPLATE = '' +
+        '<div class="{{CSS.TEXTINPUTCONTAINER}}" style="top:{{top}};left:{{left}};">' +
+            '<input type="text" class="{{CSS.TEXTINPUTFIELD}}">' +
+        '</div>';
+
 AttoRacsDrawingTextLib.prototype = {
     _setupEnterText: function(canvasNode, captureCanvasNode) {
         if(this._strokeColour === null || this._strokeWidth === null) {
