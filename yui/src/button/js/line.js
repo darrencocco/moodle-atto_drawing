@@ -30,10 +30,10 @@ AttoRacsDrawingLineLib.prototype = {
      * if the mouse leaves the canvas area or if the mouse
      * button is released.
      *
-     * @method _setupDrawLine
-     * @private
+     * @method setupDrawLine
+     * @protected
      */
-    _setupDrawLine:function (canvasNode, captureCanvasNode) {
+    setupDrawLine:function (canvasNode, captureCanvasNode) {
         if(this._strokeWidth === null || this._strokeColour === null) {
             return;
         }
@@ -48,6 +48,46 @@ AttoRacsDrawingLineLib.prototype = {
 
         captureCanvasNode.on('mouseup', function(){clearInterval(this);}, intervalDraw);
         captureCanvasNode.on('mouseleave', function(){clearInterval(this);}, intervalDraw);
+    },
+    /**
+     * Handles the the lifecycle of erasing.
+     *
+     * Is only dependent on _strokeWidth uses the
+     * canvas.context.globalCompositeOperation to erase
+     * areas that intersect with the line being drawn.
+     *
+     * Sets _lastMouse starting point then sets up
+     * an interval to call _drawLine every 10 milliseconds.
+     * Two event triggers are set to clear the interval
+     * if the mouse leaves the canvas area or if the mouse
+     * button is released.
+     *
+     * @method setupErase
+     * @protected
+     */
+    setupErase:function (canvasNode, captureCanvasNode) {
+        if(this._strokeWidth === null) {
+            return;
+        }
+        var intervalDraw,
+            underlyingNode = canvasNode._node,
+            self = this,
+            context = underlyingNode.getContext('2d');
+        this._lastMouse = {
+                x: this._mouse.x,
+                y: this._mouse.y
+            };
+        context.globalCompositeOperation = "destination-out";
+        intervalDraw = setInterval(function(){self._drawLine(context);}, 10);
+
+        captureCanvasNode.on('mouseup', function() {
+            clearInterval(this);
+            context.globalCompositeOperation = "source-over";
+        }, intervalDraw);
+        captureCanvasNode.on('mouseleave', function() {
+            clearInterval(this);
+            context.globalCompositeOperation = "source-over";
+        }, intervalDraw);
     },
 
     /**

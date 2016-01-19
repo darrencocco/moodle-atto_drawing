@@ -349,11 +349,11 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
         switch(this._selectedTool) {
         case 'erase':
             this._lineSetColour('white');
-            this._setupDrawLine(this._form.one('.' + this.CSS.CANVAS1), this._form.one('.' + this.CSS.CANVAS2));
+            this.setupErase(this._form.one('.' + this.CSS.CANVAS1), this._form.one('.' + this.CSS.CANVAS2));
             break;
         case 'draw':
             this._lineSetColour(this._colour);
-            this._setupDrawLine(this._form.one('.' + this.CSS.CANVAS1), this._form.one('.' + this.CSS.CANVAS2));
+            this.setupDrawLine(this._form.one('.' + this.CSS.CANVAS1), this._form.one('.' + this.CSS.CANVAS2));
             break;
         case 'box':
             this._lineSetColour(this._colour);
