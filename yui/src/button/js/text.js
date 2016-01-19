@@ -25,7 +25,19 @@ var AttoRacsDrawingTextLib = Y.namespace('M.atto_racsdrawing').TextLib = functio
         '</div>';
 
 AttoRacsDrawingTextLib.prototype = {
-    _setupEnterText: function(canvasNode, captureCanvasNode) {
+    /**
+     * Entry point for entering text.
+     *
+     * Starts by drawing a square which will be a
+     * representation of the outline of the space
+     * to enter text into. Once the space is defined
+     * it calls the function to setup the text
+     * entry widgets.
+     *
+     * @method setupEnterText
+     * @protected
+     */
+    setupEnterText: function(canvasNode, captureCanvasNode) {
         if(this._strokeColour === null || this._strokeWidth === null) {
             return;
         }
@@ -43,6 +55,19 @@ AttoRacsDrawingTextLib.prototype = {
         this._squareMouseLeave = captureCanvasNode.on('mouseleave', this._setupTextEditor, this, captureNode, underlyingNode, intervalDraw);
     },
 
+    /**
+     * Builds text entry interface.
+     *
+     * Adds a text box with its top left corner
+     * at the bottom left corner of the user
+     * defined writing space. Binds various
+     * events for the text editor to handle
+     * the entry of text and the finalisation
+     * of text entry.
+     *
+     * @method _setupTextEditor
+     * @private
+     */
     _setupTextEditor: function(evt, captureNode, underlyingNode, intervalDraw) {
         var template = Y.Handlebars.compile(TEXTEDITORTEMPLATE),
             boxDimensions = {
@@ -71,6 +96,16 @@ AttoRacsDrawingTextLib.prototype = {
         inputBox.focus();
     },
 
+    /**
+     * Exits when an escape key is entered.
+     *
+     * Checks if a defined escape key is entered
+     * and if so prevents normal event handling
+     * and moves focus away from the inputBox
+     *
+     * @method _textEditorEscapeKeys
+     * @private
+     */
     _textEditorEscapeKeys: function(evt, inputBox) {
         var key = evt.which;
         if (key === 13) {
@@ -80,11 +115,30 @@ AttoRacsDrawingTextLib.prototype = {
         }
     },
 
+    /**
+     * Updates the text on the canvas.
+     *
+     * Clears the entire canvas and writes the
+     * anew.
+     *
+     * @method _textEditorUpdate
+     * @private
+     */
     _textEditorUpdate: function(evt, inputBox, captureNode, boxDimensions) {
         this._clearCanvas(captureNode);
         this._writeTextToCanvas(inputBox.get('value'), captureNode, boxDimensions.top, boxDimensions.left, boxDimensions.width);
     },
 
+    /**
+     * Completes the text entry process.
+     *
+     * Destroys the input box. Clears
+     * the overlay canvas. Writes the
+     * text to the main canvas.
+     *
+     * @method _textEditorCleanup
+     * @private
+     */
     _textEditorCleanup: function(evt, inputBox, captureNode, underlyingNode, boxDimensions) {
         var text = inputBox.get('value');
         inputBox.ancestor().remove(true);
@@ -92,6 +146,16 @@ AttoRacsDrawingTextLib.prototype = {
         this._writeTextToCanvas(text, underlyingNode, boxDimensions.top, boxDimensions.left, boxDimensions.width);
     },
 
+    /**
+     * Writes text to a canvas withing the specified dimensions.
+     *
+     * Writes text to the canvas starting
+     * at top and left with a max line length
+     * of width pixels
+     *
+     * @method _writeTextToCanvas
+     * @private
+     */
     _writeTextToCanvas: function(text, canvas, top, left, width, textProperties) {
         var textProperties = textProperties||{height: 16, font: "Arial", lineSpacing: 1.1},
             fontStyle = textProperties.height+"px "+textProperties.font,
@@ -107,6 +171,17 @@ AttoRacsDrawingTextLib.prototype = {
         });
     },
 
+    /**
+     * Splits up a string into an array of strings.
+     *
+     * Splits up a string based on the style of
+     * the font and ensuring the length of each
+     * line attempts to not exceed the width in
+     * pixels.
+     *
+     * @method _textSplitter
+     * @private
+     */
     _textSplitter: function(canvas, text, width, fontStyle) {
         var words = text.split(" "),
             context = canvas.getContext("2d"),

@@ -361,7 +361,7 @@ Y.namespace('M.atto_racsdrawing').Button = Y.Base.create('button', Y.M.editor_at
             break;
         case 'text':
             this._lineSetColour("black");
-            this._setupEnterText(this._form.one('.' + this.CSS.CANVAS1), this._form.one('.' + this.CSS.CANVAS2));
+            this.setupEnterText(this._form.one('.' + this.CSS.CANVAS1), this._form.one('.' + this.CSS.CANVAS2));
             break;
         case 'save':
             this._setImage();
