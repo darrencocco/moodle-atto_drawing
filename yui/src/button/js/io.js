@@ -140,9 +140,11 @@ AttoRacsDrawingIoLib.prototype = {
         }
 
         for (i in ALIGNMENTS) {
-            css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
-            if (alignment === css) {
-                margin = ' margin: ' + ALIGNMENTS[i].margin + ';';
+            if(ALIGNMENTS.hasOwnProperty(i)) {
+                css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
+                if (alignment === css) {
+                    margin = ' margin: ' + ALIGNMENTS[i].margin + ';';
+                }
             }
         }
 
@@ -217,14 +219,16 @@ AttoRacsDrawingIoLib.prototype = {
                 properties.height = height;
             }
             for (i in ALIGNMENTS) {
-                css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
-                if (style.indexOf(css) !== -1) {
-                    margin = 'margin:' + ALIGNMENTS[i].margin + ';';
-                    margin = margin.replace(/ /g, '');
-                    // Must match alignment and margins - otherwise custom style is selected.
-                    if (style.indexOf(margin) !== -1) {
-                        properties.align = css;
-                        break;
+                if(ALIGNMENTS.hasOwnProperty(i)) {
+                    css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
+                    if (style.indexOf(css) !== -1) {
+                        margin = 'margin:' + ALIGNMENTS[i].margin + ';';
+                        margin = margin.replace(/ /g, '');
+                        // Must match alignment and margins - otherwise custom style is selected.
+                        if (style.indexOf(margin) !== -1) {
+                            properties.align = css;
+                            break;
+                        }
                     }
                 }
             }
