@@ -38,21 +38,23 @@ AttoRacsDrawingTextLib.prototype = {
      * @protected
      */
     setupEnterText: function(canvasNode, captureCanvasNode) {
-        if(this._strokeColour === null || this._strokeWidth === null) {
+        if(this._strokeColour === null || this._colour === null) {
             return;
         }
         var intervalDraw,
             underlyingNode = canvasNode._node,
             captureNode = captureCanvasNode._node,
+            oldStrokeWidth = this._strokeWidth,
             self = this;
         this._lastMouse = {
                 x: this._mouse.x,
                 y: this._mouse.y
         };
+        this._strokeWidth = 3;
         intervalDraw = setInterval(function(){self._drawSquareOverlay(captureNode);}, 10);
 
-        this._squareMouseUp = captureCanvasNode.on('mouseup', this._setupTextEditor, this, captureNode, underlyingNode, intervalDraw);
-        this._squareMouseLeave = captureCanvasNode.on('mouseleave', this._setupTextEditor, this, captureNode, underlyingNode, intervalDraw);
+        this._squareMouseUp = captureCanvasNode.on('mouseup', this._setupTextEditor, this, captureNode, underlyingNode, intervalDraw, oldStrokeWidth);
+        this._squareMouseLeave = captureCanvasNode.on('mouseleave', this._setupTextEditor, this, captureNode, underlyingNode, intervalDraw, oldStrokeWidth);
     },
 
     /**
@@ -68,7 +70,12 @@ AttoRacsDrawingTextLib.prototype = {
      * @method _setupTextEditor
      * @private
      */
-    _setupTextEditor: function(evt, captureNode, underlyingNode, intervalDraw) {
+    _setupTextEditor: function(evt, captureNode, underlyingNode, intervalDraw, oldStrokeWidth) {
+        this._squareMouseLeave.detach();
+        this._squareMouseUp.detach();
+        this._squareMouseLeave = null;
+        this._squareMouseUp = null;
+        this._strokeWidth = oldStrokeWidth;
         var template = Y.Handlebars.compile(TEXTEDITORTEMPLATE),
             boxDimensions = {
                 top: this._mouse.y < this._lastMouse.y ? this._mouse.y : this._lastMouse.y,
@@ -83,10 +90,7 @@ AttoRacsDrawingTextLib.prototype = {
             })),
             editor,
             inputBox;
-        this._squareMouseLeave.detach();
-        this._squareMouseUp.detach();
-        this._squareMouseLeave = null;
-        this._squareMouseUp = null;
+
         clearInterval(intervalDraw);
         editor = Y.one(captureNode).ancestor().appendChild(editorTemplate);
         inputBox = editor.one('.'+this.CSS.TEXTINPUTFIELD);
@@ -188,6 +192,7 @@ AttoRacsDrawingTextLib.prototype = {
             sentenceFragments = [''],
             suggestedSentence = '';
         context.font = fontStyle;
+        context.fillStyle = this._colour;
         words.forEach(function(word) {
             suggestedSentence = (sentenceFragments[sentenceFragments.length - 1] + ' ' + word).trim();
             if (context.measureText(suggestedSentence).width < width) {
